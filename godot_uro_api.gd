@@ -111,8 +111,6 @@ func create_identity_proof_for_async(p_requester : godot_uro_request_const, p_id
 func get_identity_proof_async(p_requester : godot_uro_request_const, p_id: String, p_authorization_token: String) -> String:
 	var query: Dictionary = {
 	}
-	
-	var foo = godot_uro_helper_const.get_api_path() + godot_uro_helper_const.IDENTITY_PROOFS_PATH + "/" + p_id
 
 	p_requester.call_deferred(
 		"request",
