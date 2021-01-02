@@ -12,14 +12,20 @@ var uro_host: String = godot_uro_helper_const.DEFAULT_URO_HOST
 var uro_port: int = godot_uro_helper_const.DEFAULT_URO_PORT
 var uro_using_ssl: bool = true
 
-const CONFIG_FILE_PATH = "user://uro.ini"
+const EDITOR_CONFIG_FILE_PATH = "user://uro_editor.ini"
+const GAME_CONFIG_FILE_PATH = "user://uro.ini"
 const godot_uro_api_const = preload("godot_uro_api.gd")
-const godot_uro_request_const = preload("godot_uro_requestor.gd")
+const godot_uro_request_const = preload("godot_uro_requester.gd")
 
 var godot_uro_api: godot_uro_api_const = null
 
 signal request_shard_list_callback(p_result)
 
+func get_uro_config_path() -> String:
+	if Engine.is_editor_hint():
+		return EDITOR_CONFIG_FILE_PATH
+	else:
+		return GAME_CONFIG_FILE_PATH
 
 func get_host_and_port() -> Dictionary:
 	var host: String = ""
@@ -41,11 +47,11 @@ func using_ssl() -> bool:
 func create_requester() -> godot_uro_request_const:
 	var host_and_port: Dictionary = get_host_and_port()
 
-	var requestor = godot_uro_request_const.new(
+	var new_requester = godot_uro_request_const.new(
 		host_and_port.host, host_and_port.port, GodotUro.using_ssl()
 	)
 	
-	return requestor
+	return new_requester
 
 func setup_configuration() -> void:
 	if ! ProjectSettings.has_setting("services/uro/use_localhost"):
@@ -70,12 +76,12 @@ func setup_configuration() -> void:
 
 func _enter_tree():
 	cfg = ConfigFile.new()
-	cfg.load(CONFIG_FILE_PATH)
-
-	if godot_uro_api == null:
-		godot_uro_api = godot_uro_api_const.new()
+	cfg.load(get_uro_config_path())
 
 	setup_configuration()
+	
+	if godot_uro_api == null:
+		godot_uro_api = godot_uro_api_const.new()
 
 
 func _exit_tree():

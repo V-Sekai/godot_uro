@@ -60,8 +60,13 @@ func term() -> void:
 	terminated = true
 	http.close()
 	
+enum TokenType {
+	NO_TOKEN,
+	RENEWAL_TOKEN,
+	ACCESS_TOKEN
+}
 	
-func request(p_path, p_payload, p_token: String, p_options: Dictionary = DEFAULT_OPTIONS) -> void:
+func request(p_path: String, p_payload: Dictionary, p_use_token: int, p_options: Dictionary = DEFAULT_OPTIONS) -> void:
 	while busy and ! terminated:
 		yield(Engine.get_main_loop(), "idle_frame")
 		if terminated:
@@ -118,8 +123,12 @@ func request(p_path, p_payload, p_token: String, p_options: Dictionary = DEFAULT
 		var encoded_payload: String = ""
 		var headers: Array = []
 		
-		if p_token != "":
-			headers.push_back("Authorization: %s" % p_token)
+		if p_use_token != TokenType.NO_TOKEN:
+			match p_use_token:
+				TokenType.RENEWAL_TOKEN:
+					headers.push_back("Authorization: %s" % GodotUro.renewal_token)
+				TokenType.ACCESS_TOKEN:
+					headers.push_back("Authorization: %s" % GodotUro.access_token)
 			
 		if p_payload:
 			var encoding = _get_option(p_options, "encoding")
