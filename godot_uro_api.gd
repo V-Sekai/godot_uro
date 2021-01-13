@@ -202,7 +202,7 @@ func update_shard_async(p_id: String, p_query: Dictionary):
 	return _handle_result(result)
 
 
-func get_shards():
+func get_shards_async():
 	var query: Dictionary = godot_uro_helper_const.populate_query(SHARD_NAME, {})
 
 	requester.call(
@@ -216,6 +216,37 @@ func get_shards():
 
 	return godot_uro_helper_const.process_shards_json(_handle_result(result))
 
+func get_avatar_async(p_id: String) -> String:
+	var query: Dictionary = {
+	}
+
+	requester.call(
+		"request",
+		godot_uro_helper_const.get_api_path() + godot_uro_helper_const.AVATARS_PATH + "/" + p_id,
+		query,
+		godot_uro_requester_const.TokenType.ACCESS_TOKEN,
+		{"method": HTTPClient.METHOD_GET, "encoding": "form"}
+	)
+
+	var result = yield(requester, "completed")
+
+	return _handle_result(result)
+	
+func get_map_async(p_id: String) -> String:
+	var query: Dictionary = {
+	}
+
+	requester.call(
+		"request",
+		godot_uro_helper_const.get_api_path() + godot_uro_helper_const.MAPS_PATH + "/" + p_id,
+		query,
+		godot_uro_requester_const.TokenType.ACCESS_TOKEN,
+		{"method": HTTPClient.METHOD_GET, "encoding": "form"}
+	)
+
+	var result = yield(requester, "completed")
+
+	return _handle_result(result)
 
 static func _handle_result(result) -> Dictionary:
 	var result_dict: Dictionary = {

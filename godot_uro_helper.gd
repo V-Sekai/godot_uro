@@ -1,10 +1,10 @@
 extends Reference
 
-enum {
-	URO_USER_CONTENT_TYPE_UNKNOWN,
-	URO_USER_CONTENT_TYPE_AVATAR,
-	URO_USER_CONTENT_TYPE_MAP,
-	URO_USER_CONTENT_TYPE_PROP,
+enum UroUserContentType {
+	UNKNOWN,
+	AVATAR,
+	MAP,
+	PROP
 }
 
 const LOCALHOST_HOST = "127.0.0.1"
@@ -24,6 +24,8 @@ const PROFILE_PATH = "/profile"
 const SESSION_PATH = "/session"
 const REGISTRATION_PATH = "/registration"
 const IDENTITY_PROOFS_PATH = "/identity_proofs"
+const AVATARS_PATH = "/avatars"
+const MAPS_PATH = "/maps"
 const SHARDS_PATH = "/shards"
 
 const DEFAULT_ACCOUNT_ID = "UNKNOWN_ID"
