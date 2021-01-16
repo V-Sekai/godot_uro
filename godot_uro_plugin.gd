@@ -1,5 +1,5 @@
-extends EditorPlugin
 tool
+extends EditorPlugin
 
 const uro_logo_const = preload("uro_logo.png")
 var editor_interface: EditorInterface = null

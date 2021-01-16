@@ -1,3 +1,4 @@
+tool
 extends Reference
 
 const godot_uro_requester_const = preload("godot_uro_requester.gd")

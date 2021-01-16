@@ -1,5 +1,5 @@
-extends Node
 tool
+extends Node
 
 const godot_uro_helper_const = preload("godot_uro_helper.gd")
 
