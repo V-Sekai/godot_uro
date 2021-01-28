@@ -1,8 +1,12 @@
 tool
 extends Reference
 
+const random_const = preload("res://addons/gdutil/random.gd")
+
 signal completed(p_result)
 
+const BOUNDARY_STRING_PREFIX = "UroFileUpload"
+const BOUNDARY_STRING_LENGTH = 32
 const YIELD_PERIOD_MS = 50
 
 
@@ -121,7 +125,7 @@ func request(p_path: String, p_payload: Dictionary, p_use_token: int, p_options:
 			emit_signal("completed", null)
 			
 		var uri: String = p_path
-		var encoded_payload: String = ""
+		var encoded_payload: PoolByteArray = PoolByteArray()
 		var headers: Array = []
 		
 		if p_use_token != TokenType.NO_TOKEN:
@@ -132,21 +136,31 @@ func request(p_path: String, p_payload: Dictionary, p_use_token: int, p_options:
 					headers.push_back("Authorization: %s" % GodotUro.access_token)
 			
 		if p_payload:
-			var encoding = _get_option(p_options, "encoding")
-			if encoding == "query":
-				uri += "?%s" % _dict_to_query_string(p_payload)
-			elif encoding == "json":
-				headers.append("Content-Type: application/json")
-				encoded_payload = to_json(p_payload)
-			elif encoding == "form":
-				headers.append("Content-Type: application/x-www-form-urlencoded")
-				encoded_payload = _dict_to_query_string(p_payload)
+			var encoding: String = _get_option(p_options, "encoding")
+			match encoding:
+				"query":
+					uri += "?%s" % _dict_to_query_string(p_payload)
+				"json":
+					headers.append("Content-Type: application/json")
+					var payload_string: String = to_json(p_payload)
+					encoded_payload = payload_string.to_utf8()
+				"form":
+					headers.append("Content-Type: application/x-www-form-urlencoded")
+					var payload_string: String = _dict_to_query_string(p_payload)
+					encoded_payload = payload_string.to_utf8()
+				"multipart":
+					var boundary_string: String = BOUNDARY_STRING_PREFIX + random_const.generate_unique_id(BOUNDARY_STRING_LENGTH)
+					headers.append("Content-Type: multipart/form-data; boundary=%s" % boundary_string)
+					encoded_payload = _compose_multipart_body(p_payload, boundary_string)
+				_:
+					printerr("Unknown encoding type!")
+					break
 				
 		var token = _get_option(p_options, "token")
-		if token:
+		if token and token is String:
 			headers.append("Authorization: Bearer %s" % token)
 			
-		http.request(_get_option(p_options, "method"), uri, headers, encoded_payload)
+		http.request_raw(_get_option(p_options, "method"), uri, headers, encoded_payload)
 		http.poll()
 		status = http.get_status()
 		if (
@@ -308,8 +322,33 @@ func request(p_path: String, p_payload: Dictionary, p_use_token: int, p_options:
 func _get_option(options, key):
 	return options[key] if options.has(key) else DEFAULT_OPTIONS[key]
 	
+static func _compose_multipart_body(p_dictionary: Dictionary, p_boundary_string: String) -> PoolByteArray:
+	var buffer: PoolByteArray = PoolByteArray()
+	for key in p_dictionary.keys():
+		buffer.append_array(("\r\n--" + p_boundary_string + "\r\n").to_ascii())
+		var value = p_dictionary[key]
+		if value is String:
+			var disposition: PoolByteArray = ("Content-Disposition: form-data; name=\"%s\"\r\n\r\n" % key).to_ascii()
+			var body: PoolByteArray = value.to_utf8()
+			
+			buffer.append_array(disposition)
+			buffer.append_array(body)
+		elif value is Dictionary:
+			var content_type: String = value.get("content_type")
+			var filename: String = value.get("filename")
+			var data: PoolByteArray = value.get("data")
+			
+			var disposition = ("Content-Disposition: form-data; name=\"%s\"; filename=\"%s\"\r\nContent-Type: %s\r\n\r\n" % [key, filename, content_type]).to_ascii()
+			var body: PoolByteArray = data
+
+			buffer.append_array(disposition)
+			buffer.append_array(body)
+		
+	buffer.append_array(("\r\n--" + p_boundary_string + "--\r\n").to_ascii())
+
+	return buffer
 	
-func _dict_to_query_string(p_dictionary) -> String:
+func _dict_to_query_string(p_dictionary: Dictionary) -> String:
 	if has_enhanced_qs_from_dict:
 		return http.query_string_from_dict(p_dictionary)
 		

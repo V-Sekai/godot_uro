@@ -28,6 +28,7 @@ const IDENTITY_PROOFS_PATH = "/identity_proofs"
 const AVATARS_PATH = "/avatars"
 const MAPS_PATH = "/maps"
 const SHARDS_PATH = "/shards"
+const DASHBOARD_PATH = "/dashboard"
 
 const DEFAULT_ACCOUNT_ID = "UNKNOWN_ID"
 const DEFAULT_ACCOUNT_USERNAME = "UNKNOWN_USERNAME"
@@ -58,26 +59,28 @@ static func process_session_json(p_input: Dictionary) -> Dictionary:
 	var http_response_code: int = p_input["code"]
 	if http_response_code != -1:
 		if http_response_code == HTTPClient.RESPONSE_OK:
-			var data = p_input["output"].get("data")
-			if data is Dictionary:
-				var renewel_token: String = get_value_of_type(data, "renewal_token", TYPE_STRING, GodotUro.renewal_token)
-				var access_token: String = get_value_of_type(data, "access_token", TYPE_STRING, GodotUro.access_token)
-				
-				var user: Dictionary = get_value_of_type(data, "user", TYPE_DICTIONARY, {})
-				
-				var user_id: String = get_value_of_type(user, "id", TYPE_STRING, DEFAULT_ACCOUNT_ID)
-				var user_username: String = get_value_of_type(user, "username", TYPE_STRING, DEFAULT_ACCOUNT_USERNAME)
-				var user_display_name: String = get_value_of_type(user, "display_name", TYPE_STRING, DEFAULT_ACCOUNT_DISPLAY_NAME)
-				
-				return {"code":http_response_code, "message": "Success!",\
-				"renewel_token":renewel_token,\
-				"access_token":access_token,\
-				"user_id":user_id,\
-				"user_username":user_username,\
-				"user_display_name":user_display_name}
+			var output = p_input["output"]
+			if output is Dictionary:
+				var data = output.get("data")
+				if data is Dictionary:
+					var renewel_token: String = get_value_of_type(data, "renewal_token", TYPE_STRING, GodotUro.renewal_token)
+					var access_token: String = get_value_of_type(data, "access_token", TYPE_STRING, GodotUro.access_token)
+					
+					var user: Dictionary = get_value_of_type(data, "user", TYPE_DICTIONARY, {})
+					
+					var user_id: String = get_value_of_type(user, "id", TYPE_STRING, DEFAULT_ACCOUNT_ID)
+					var user_username: String = get_value_of_type(user, "username", TYPE_STRING, DEFAULT_ACCOUNT_USERNAME)
+					var user_display_name: String = get_value_of_type(user, "display_name", TYPE_STRING, DEFAULT_ACCOUNT_DISPLAY_NAME)
+					
+					return {"code":http_response_code, "message": "Success!",\
+					"renewel_token":renewel_token,\
+					"access_token":access_token,\
+					"user_id":user_id,\
+					"user_username":user_username,\
+					"user_display_name":user_display_name}
 		else:
 			var output = p_input.get("output")
-			if output:
+			if output is Dictionary:
 				var error = output.get("error")
 				if error is Dictionary:
 					var message = error.get("message")

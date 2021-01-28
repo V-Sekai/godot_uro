@@ -27,6 +27,13 @@ func get_uro_config_path() -> String:
 	else:
 		return GAME_CONFIG_FILE_PATH
 
+func get_base_url() -> String:
+	if use_localhost:
+		# "http://localhost:" does not work
+		return "http://127.0.0.1:" + str(uro_port)
+	else:
+		return uro_host
+
 func get_host_and_port() -> Dictionary:
 	var host: String = ""
 	var port: int = 0
@@ -48,7 +55,7 @@ func create_requester() -> godot_uro_request_const:
 	var host_and_port: Dictionary = get_host_and_port()
 
 	var new_requester = godot_uro_request_const.new(
-		host_and_port.host, host_and_port.port, GodotUro.using_ssl()
+		host_and_port.host, host_and_port.port, using_ssl()
 	)
 	
 	return new_requester
@@ -74,15 +81,11 @@ func setup_configuration() -> void:
 	else:
 		uro_using_ssl = ProjectSettings.get_setting("services/uro/use_ssl")
 
-func _enter_tree():
+func _init():
 	cfg = ConfigFile.new()
 	cfg.load(get_uro_config_path())
 
 	setup_configuration()
 	
 	if godot_uro_api == null:
-		godot_uro_api = godot_uro_api_const.new()
-
-
-func _exit_tree():
-	pass
+		godot_uro_api = godot_uro_api_const.new(self)
