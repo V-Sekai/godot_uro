@@ -254,6 +254,26 @@ func get_map_async(p_id: String) -> String:
 """
 Dashboard Avatar
 """
+
+func dashboard_get_avatars_async() -> String:
+	var query: Dictionary = {}
+	
+	var path: String = godot_uro_helper_const.get_api_path() +\
+		godot_uro_helper_const.DASHBOARD_PATH +\
+		godot_uro_helper_const.AVATARS_PATH
+	
+	requester.call(
+		"request",
+		path,
+		query,
+		godot_uro_requester_const.TokenType.ACCESS_TOKEN,
+		{"method": HTTPClient.METHOD_GET, "encoding": "form"}
+	)
+
+	var result = yield(requester, "completed")
+
+	return _handle_result(result)
+
 func dashboard_create_avatar_async(p_query: Dictionary) -> String:
 	var query: Dictionary = godot_uro_helper_const.populate_query(AVATAR_NAME, p_query)
 	
@@ -316,6 +336,25 @@ func dashboard_get_avatar_async(p_id: String) -> String:
 """
 Dashboard Map
 """
+
+func dashboard_get_maps_async() -> String:
+	var query: Dictionary = {}
+	
+	var path: String = godot_uro_helper_const.get_api_path() +\
+		godot_uro_helper_const.DASHBOARD_PATH +\
+		godot_uro_helper_const.MAPS_PATH
+	
+	requester.call(
+		"request",
+		path,
+		query,
+		godot_uro_requester_const.TokenType.ACCESS_TOKEN,
+		{"method": HTTPClient.METHOD_GET, "encoding": "form"}
+	)
+
+	var result = yield(requester, "completed")
+
+	return _handle_result(result)
 
 func dashboard_create_map_async(p_query: Dictionary) -> String:
 	var query: Dictionary = godot_uro_helper_const.populate_query(MAP_NAME, p_query)
