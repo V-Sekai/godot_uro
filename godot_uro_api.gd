@@ -380,7 +380,7 @@ func dashboard_update_map_async(p_id: String, p_query: Dictionary) -> String:
 	
 	var path: String = godot_uro_helper_const.get_api_path() +\
 		godot_uro_helper_const.DASHBOARD_PATH +\
-		godot_uro_helper_const.MAP_PATH +\
+		godot_uro_helper_const.MAPS_PATH +\
 		"/" + str(p_id)
 	
 	requester.call(
