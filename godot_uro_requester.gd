@@ -3,8 +3,6 @@ extends Reference
 
 const random_const = preload("res://addons/gdutil/random.gd")
 
-signal completed(p_result)
-
 const BOUNDARY_STRING_PREFIX = "UroFileUpload"
 const BOUNDARY_STRING_LENGTH = 32
 const YIELD_PERIOD_MS = 50
@@ -71,7 +69,7 @@ enum TokenType {
 	ACCESS_TOKEN
 }
 	
-func request(p_path: String, p_payload: Dictionary, p_use_token: int, p_options: Dictionary = DEFAULT_OPTIONS) -> void:
+func request(p_path: String, p_payload: Dictionary, p_use_token: int, p_options: Dictionary = DEFAULT_OPTIONS) -> Result:
 	while busy and ! terminated:
 		yield(Engine.get_main_loop(), "idle_frame")
 		if terminated:
@@ -83,8 +81,7 @@ func request(p_path: String, p_payload: Dictionary, p_use_token: int, p_options:
 	if cancelled:
 		cancelled = false
 		busy = false
-		emit_signal("completed", null)
-		return
+		return null
 		
 	var reconnect_tries: int = 3
 	while reconnect_tries:
@@ -101,8 +98,7 @@ func request(p_path: String, p_payload: Dictionary, p_use_token: int, p_options:
 				if cancelled:
 					cancelled = false
 					busy = false
-					emit_signal("completed", null)
-					return
+					return null
 					
 				if (
 					status
@@ -113,8 +109,7 @@ func request(p_path: String, p_payload: Dictionary, p_use_token: int, p_options:
 					]
 				):
 					busy = false
-					emit_signal("completed")
-					return
+					return null
 					
 				if status == HTTPClient.STATUS_CONNECTED:
 					break
@@ -122,7 +117,7 @@ func request(p_path: String, p_payload: Dictionary, p_use_token: int, p_options:
 		if cancelled:
 			cancelled = false
 			busy = false
-			emit_signal("completed", null)
+			return null
 			
 		var uri: String = p_path
 		var encoded_payload: PoolByteArray = PoolByteArray()
@@ -182,8 +177,7 @@ func request(p_path: String, p_payload: Dictionary, p_use_token: int, p_options:
 	if cancelled:
 		cancelled = false
 		busy = false
-		emit_signal("completed", null)
-		return
+		return null
 		
 	while true:
 		yield(Engine.get_main_loop(), "idle_frame")
@@ -193,8 +187,7 @@ func request(p_path: String, p_payload: Dictionary, p_use_token: int, p_options:
 			http.close()
 			cancelled = false
 			busy = false
-			emit_signal("completed", null)
-			return
+			return null
 			
 		http.poll()
 		status = http.get_status()
@@ -206,8 +199,7 @@ func request(p_path: String, p_payload: Dictionary, p_use_token: int, p_options:
 			]
 		):
 			busy = false
-			emit_signal("completed", Result.new(-1))
-			return
+			return Result.new(-1)
 			
 		if (
 			status
@@ -238,8 +230,7 @@ func request(p_path: String, p_payload: Dictionary, p_use_token: int, p_options:
 		file = File.new()
 		if file.open(out_path, File.WRITE) != OK:
 			busy = false
-			emit_signal("completed", Result.new(-1))
-			return
+			return Result.new(-1)
 			
 	var last_yield = OS.get_ticks_msec()
 	
@@ -268,8 +259,7 @@ func request(p_path: String, p_payload: Dictionary, p_use_token: int, p_options:
 					file.close()
 				cancelled = false
 				busy = false
-				emit_signal("completed", null)
-				return
+				return null
 				
 		http.poll()
 		status = http.get_status()
@@ -281,8 +271,7 @@ func request(p_path: String, p_payload: Dictionary, p_use_token: int, p_options:
 			if file:
 				file.close()
 			busy = false
-			emit_signal("completed", Result.new(-1))
-			return
+			return Result.new(-1)
 			
 	yield(Engine.get_main_loop(), "idle_frame")
 	if terminated:
@@ -295,8 +284,7 @@ func request(p_path: String, p_payload: Dictionary, p_use_token: int, p_options:
 			file.close()
 		cancelled = false
 		busy = false
-		emit_signal("completed", null)
-		return
+		return null
 		
 	busy = false
 	
@@ -316,7 +304,7 @@ func request(p_path: String, p_payload: Dictionary, p_use_token: int, p_options:
 			else:
 				printerr("JSON validation result: %s" % json_validation_result)
 				
-	emit_signal("completed", Result.new(response_code, data))
+	return Result.new(response_code, data)
 	
 	
 func _get_option(options, key):
