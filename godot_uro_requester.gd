@@ -1,24 +1,24 @@
 tool
 extends Reference
 
+const godot_uro_helper_const = preload("godot_uro_helper.gd")
 const random_const = preload("res://addons/gdutil/random.gd")
 
 const BOUNDARY_STRING_PREFIX = "UroFileUpload"
 const BOUNDARY_STRING_LENGTH = 32
 const YIELD_PERIOD_MS = 50
 
-
 class Result:
-	var ok setget , _is_ok
-	var code: int
-	var data
+	var requester_code: int = -1
+	var generic_code: int = -1
+	var response_code: int = -1
+	var data: Dictionary = {}
 
-	func _init(code: int, data = null) -> void:
-		self.code = code
-		self.data = data
-
-	func _is_ok():
-		return code >= 0
+	func _init(p_requester_code: int, p_generic_code: int, p_response_code: int, p_data = {}) -> void:
+		self.requester_code = p_requester_code
+		self.generic_code = p_generic_code
+		self.response_code = p_response_code
+		self.data = p_data
 
 
 const DEFAULT_OPTIONS = {
@@ -68,6 +68,21 @@ enum TokenType {
 	RENEWAL_TOKEN,
 	ACCESS_TOKEN
 }
+
+static func get_status_error_response(p_status: int) -> Result:
+	match p_status:
+		HTTPClient.STATUS_CANT_CONNECT:
+			return Result.new(godot_uro_helper_const.RequesterCode.CANT_CONNECT, FAILED, -1)
+		HTTPClient.STATUS_CANT_RESOLVE:
+			return Result.new(godot_uro_helper_const.RequesterCode.CANT_RESOLVE, FAILED, -1)
+		HTTPClient.STATUS_SSL_HANDSHAKE_ERROR:
+			return Result.new(godot_uro_helper_const.RequesterCode.SSL_HANDSHAKE_ERROR, FAILED, -1)
+		HTTPClient.STATUS_DISCONNECTED:
+			return Result.new(godot_uro_helper_const.RequesterCode.DISCONNECTED, FAILED, -1)
+		HTTPClient.STATUS_CONNECTION_ERROR:
+			return Result.new(godot_uro_helper_const.RequesterCode.CONNECTION_ERROR, FAILED, -1)
+		_:
+			return Result.new(godot_uro_helper_const.RequesterCode.UNKNOWN_STATUS_ERROR, FAILED, -1)
 	
 func request(p_path: String, p_payload: Dictionary, p_use_token: int, p_options: Dictionary = DEFAULT_OPTIONS) -> Result:
 	while busy and ! terminated:
@@ -81,7 +96,7 @@ func request(p_path: String, p_payload: Dictionary, p_use_token: int, p_options:
 	if cancelled:
 		cancelled = false
 		busy = false
-		return null
+		return Result.new(godot_uro_helper_const.RequesterCode.CANCELLED, OK, -1)
 		
 	var reconnect_tries: int = 3
 	while reconnect_tries:
@@ -109,7 +124,7 @@ func request(p_path: String, p_payload: Dictionary, p_use_token: int, p_options:
 					]
 				):
 					busy = false
-					return null
+					return get_status_error_response(status)
 					
 				if status == HTTPClient.STATUS_CONNECTED:
 					break
@@ -199,7 +214,7 @@ func request(p_path: String, p_payload: Dictionary, p_use_token: int, p_options:
 			]
 		):
 			busy = false
-			return Result.new(-1)
+			return get_status_error_response(status)
 			
 		if (
 			status
@@ -228,9 +243,10 @@ func request(p_path: String, p_payload: Dictionary, p_use_token: int, p_options:
 			total_bytes = -1
 			
 		file = File.new()
-		if file.open(out_path, File.WRITE) != OK:
+		var err: int = file.open(out_path, File.WRITE)
+		if err != OK:
 			busy = false
-			return Result.new(-1)
+			return Result.new(godot_uro_helper_const.RequesterCode.FILE_ERROR, err, -1)
 			
 	var last_yield = OS.get_ticks_msec()
 	
@@ -264,14 +280,17 @@ func request(p_path: String, p_payload: Dictionary, p_use_token: int, p_options:
 		http.poll()
 		status = http.get_status()
 		if (
-			status in [HTTPClient.STATUS_DISCONNECTED, HTTPClient.STATUS_CONNECTION_ERROR]
+			status in [
+				HTTPClient.STATUS_DISCONNECTED,
+				HTTPClient.STATUS_CONNECTION_ERROR
+				]
 			and ! terminated
 			and ! cancelled
 		):
 			if file:
 				file.close()
 			busy = false
-			return Result.new(-1)
+			return get_status_error_response(status)
 			
 	yield(Engine.get_main_loop(), "idle_frame")
 	if terminated:
@@ -304,7 +323,10 @@ func request(p_path: String, p_payload: Dictionary, p_use_token: int, p_options:
 			else:
 				printerr("JSON validation result: %s" % json_validation_result)
 				
-	return Result.new(response_code, data)
+	if response_code == HTTPClient.RESPONSE_OK:
+		return Result.new(godot_uro_helper_const.RequesterCode.OK, OK, response_code, data)
+	else:
+		return Result.new(godot_uro_helper_const.RequesterCode.HTTP_RESPONSE_NOT_OK, FAILED, response_code, data)
 	
 	
 func _get_option(options, key):

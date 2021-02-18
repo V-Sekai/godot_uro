@@ -73,7 +73,6 @@ func sign_in_async(p_username_or_email: String, p_password: String):
 		godot_uro_requester_const.TokenType.NO_TOKEN,
 		{"method": HTTPClient.METHOD_POST, "encoding": "form"}
 	), "completed")
-	requester.term()
 	
 	requester = new_requester
 
@@ -378,14 +377,16 @@ func dashboard_get_map_async(p_id: String) -> String:
 
 	return _handle_result(result)
 
-static func _handle_result(result) -> Dictionary:
+static func _handle_result(result: Reference) -> Dictionary:
 	var result_dict: Dictionary = {
-		"code": -1, "output": null
+		"requester_code":-1, "generic_code":-1, "response_code":-1, "output": {}
 	}
-
+	
 	if result:
-		result_dict["code"] = result["code"]
-		result_dict["output"] = result["data"]
+		result_dict["requester_code"] = result.requester_code
+		result_dict["generic_code"] = result.generic_code
+		result_dict["response_code"] = result.response_code
+		result_dict["output"] = result.data
 
 	return result_dict
 	

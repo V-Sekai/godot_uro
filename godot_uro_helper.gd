@@ -37,6 +37,69 @@ const DEFAULT_ACCOUNT_DISPLAY_NAME = "UNKNOWN_DISPLAY_NAME"
 const UNTITLED_SHARD = "UNTITLED_SHARD"
 const UNKNOWN_MAP = "UNKNOWN_MAP"
 
+enum RequesterCode {
+	OK,
+	CANCELLED,
+	CANT_CONNECT,
+	CANT_RESOLVE,
+	SSL_HANDSHAKE_ERROR,
+	DISCONNECTED,
+	CONNECTION_ERROR,
+	UNKNOWN_STATUS_ERROR,
+	FILE_ERROR,
+	HTTP_RESPONSE_NOT_OK,
+	NO_TOKEN,
+	MALFORMED_RESPONSE_DATA
+}
+
+static func get_string_for_requester_code(p_requester_code: int) -> String:
+	match p_requester_code:
+		RequesterCode.OK:
+			return "OK"
+		RequesterCode.CANCELLED:
+			return "CANCELLED"
+		RequesterCode.CANT_RESOLVE:
+			return "CANT_RESOLVE"
+		RequesterCode.SSL_HANDSHAKE_ERROR:
+			return "SSL_HANDSHAKE_ERROR"
+		RequesterCode.DISCONNECTED:
+			return "DISCONNECTED"
+		RequesterCode.CONNECTION_ERROR:
+			return "CONNECTION_ERROR"
+		RequesterCode.UNKNOWN_STATUS_ERROR:
+			return "UNKNOWN_STATUS_ERROR"
+		RequesterCode.FILE_ERROR:
+			return "FILE_ERROR"
+		RequesterCode.HTTP_RESPONSE_NOT_OK:
+			return "HTTP_RESPONSE_NOT_OK"
+		RequesterCode.NO_TOKEN:
+			return "NO_TOKEN"
+		RequesterCode.MALFORMED_RESPONSE_DATA:
+			return "MALFORMED_RESPONSE_DATA"
+		_:
+			return "UNKNOWN_REQUESTER_ERROR"
+			
+static func get_full_requester_error_string(p_requester: Dictionary) -> String:
+	if p_requester["requester_code"] == RequesterCode.FILE_ERROR:
+		return ("%s: code: %s" % [get_string_for_requester_code(p_requester["requester_code"]), p_requester["generic_code"]])
+	elif p_requester["requester_code"] == RequesterCode.HTTP_RESPONSE_NOT_OK:
+		return ("%s: code: %s" % [get_string_for_requester_code(p_requester["requester_code"]), p_requester["response_code"]])
+	else:
+		return (get_string_for_requester_code(p_requester["requester_code"]))
+			
+static func requester_result_is_ok(p_result) -> bool:
+	if p_result["requester_code"] == RequesterCode.OK:
+		return true
+	else:
+		return false
+		
+static func requester_result_has_response(p_result) -> bool:
+	if p_result["requester_code"] == RequesterCode.OK\
+	or p_result["requester_code"] == RequesterCode.HTTP_RESPONSE_NOT_OK:
+		return true
+	else:
+		return false
+		
 static func populate_query(p_query_name: String, p_query_dictionary: Dictionary) -> Dictionary:
 	var query: Dictionary = {}
 
@@ -56,9 +119,9 @@ static func get_value_of_type(p_data: Dictionary, p_key: String, p_type: int, p_
 		return p_default_value
 
 static func process_session_json(p_input: Dictionary) -> Dictionary:
-	var http_response_code: int = p_input["code"]
-	if http_response_code != -1:
-		if http_response_code == HTTPClient.RESPONSE_OK:
+	if requester_result_has_response(p_input):
+		var http_response_code: int = p_input["response_code"]
+		if requester_result_is_ok(p_input):
 			var output = p_input["output"]
 			if output is Dictionary:
 				var data = output.get("data")
@@ -72,12 +135,25 @@ static func process_session_json(p_input: Dictionary) -> Dictionary:
 					var user_username: String = get_value_of_type(user, "username", TYPE_STRING, DEFAULT_ACCOUNT_USERNAME)
 					var user_display_name: String = get_value_of_type(user, "display_name", TYPE_STRING, DEFAULT_ACCOUNT_DISPLAY_NAME)
 					
-					return {"code":http_response_code, "message": "Success!",\
-					"renewel_token":renewel_token,\
-					"access_token":access_token,\
-					"user_id":user_id,\
-					"user_username":user_username,\
-					"user_display_name":user_display_name}
+					
+					return {
+						"requester_code":p_input["requester_code"],
+						"generic_code":p_input["generic_code"],
+						"response_code":p_input["response_code"],
+						"message":"Success!",
+						"renewel_token":renewel_token,\
+						"access_token":access_token,\
+						"user_id":user_id,\
+						"user_username":user_username,\
+						"user_display_name":user_display_name
+					}
+			return {
+				"requester_code":RequesterCode.MALFORMED_RESPONSE_DATA,
+				"generic_code":p_input["generic_code"],
+				"response_code":p_input["response_code"],
+				"message":"Malformed response data!",
+			}
+					
 		else:
 			var output = p_input.get("output")
 			if output is Dictionary:
@@ -85,11 +161,33 @@ static func process_session_json(p_input: Dictionary) -> Dictionary:
 				if error is Dictionary:
 					var message = error.get("message")
 					if message is String:
-						return {"code":http_response_code, "message": message}
+						return {
+							"requester_code":p_input["requester_code"],
+							"generic_code":p_input["generic_code"],
+							"response_code":p_input["response_code"],
+							"message":message
+						}
 			
-			return {"code":http_response_code, "message":"error_code: %s" % http_response_code}
-			
-	return {"code":http_response_code, "message":""}
+			return {
+				"requester_code":RequesterCode.MALFORMED_RESPONSE_DATA,
+				"generic_code":p_input["generic_code"],
+				"response_code":p_input["response_code"],
+				"message":"[NULL]"
+			}
+	else:
+		return {
+			"requester_code":p_input["requester_code"],
+			"generic_code":p_input["generic_code"],
+			"response_code":p_input["response_code"],
+			"message":"Response error!"
+		}
+	
+	return {
+		"requester_code":p_input["requester_code"],
+		"generic_code":p_input["generic_code"],
+		"response_code":p_input["response_code"],
+		"message":"Unknown error!"
+	}
 
 static func process_shards_json(p_input: Dictionary) -> Dictionary:
 	var result_dict: Dictionary = {}
@@ -113,6 +211,8 @@ static func process_shards_json(p_input: Dictionary) -> Dictionary:
 					new_shards.push_back(new_shard)
 					
 
-	result_dict["code"] = p_input["code"]
+	result_dict["requester_code"] = p_input["requester_code"]
+	result_dict["generic_code"] = p_input["generic_code"]
+	result_dict["response_code"] = p_input["response_code"]
 	result_dict["output"] = {"data":{"shards": new_shards}}
 	return result_dict
