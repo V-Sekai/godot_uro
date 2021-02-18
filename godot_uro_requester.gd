@@ -113,7 +113,7 @@ func request(p_path: String, p_payload: Dictionary, p_use_token: int, p_options:
 				if cancelled:
 					cancelled = false
 					busy = false
-					return null
+					return Result.new(godot_uro_helper_const.RequesterCode.CANCELLED, OK, -1)
 					
 				if (
 					status
@@ -132,7 +132,7 @@ func request(p_path: String, p_payload: Dictionary, p_use_token: int, p_options:
 		if cancelled:
 			cancelled = false
 			busy = false
-			return null
+			return Result.new(godot_uro_helper_const.RequesterCode.CANCELLED, OK, -1)
 			
 		var uri: String = p_path
 		var encoded_payload: PoolByteArray = PoolByteArray()
@@ -192,7 +192,7 @@ func request(p_path: String, p_payload: Dictionary, p_use_token: int, p_options:
 	if cancelled:
 		cancelled = false
 		busy = false
-		return null
+		return Result.new(godot_uro_helper_const.RequesterCode.CANCELLED, OK, -1)
 		
 	while true:
 		yield(Engine.get_main_loop(), "idle_frame")
@@ -202,7 +202,7 @@ func request(p_path: String, p_payload: Dictionary, p_use_token: int, p_options:
 			http.close()
 			cancelled = false
 			busy = false
-			return null
+			return Result.new(godot_uro_helper_const.RequesterCode.CANCELLED, OK, -1)
 			
 		http.poll()
 		status = http.get_status()
@@ -275,7 +275,7 @@ func request(p_path: String, p_payload: Dictionary, p_use_token: int, p_options:
 					file.close()
 				cancelled = false
 				busy = false
-				return null
+				return Result.new(godot_uro_helper_const.RequesterCode.CANCELLED, OK, -1)
 				
 		http.poll()
 		status = http.get_status()
@@ -303,7 +303,7 @@ func request(p_path: String, p_payload: Dictionary, p_use_token: int, p_options:
 			file.close()
 		cancelled = false
 		busy = false
-		return null
+		return Result.new(godot_uro_helper_const.RequesterCode.CANCELLED, OK, -1)
 		
 	busy = false
 	
