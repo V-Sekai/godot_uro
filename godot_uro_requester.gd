@@ -14,11 +14,11 @@ class Result:
 	var response_code: int = -1
 	var data: Dictionary = {}
 
-	func _init(p_requester_code: int, p_generic_code: int, p_response_code: int, p_data = {}) -> void:
-		self.requester_code = p_requester_code
-		self.generic_code = p_generic_code
-		self.response_code = p_response_code
-		self.data = p_data
+	func _init(p_requester_code: int, p_generic_code: int, p_response_code: int, p_data: Dictionary = {}) -> void:
+		requester_code = p_requester_code
+		generic_code = p_generic_code
+		response_code = p_response_code
+		data = p_data
 
 
 const DEFAULT_OPTIONS = {
@@ -100,34 +100,43 @@ func request(p_path: String, p_payload: Dictionary, p_use_token: int, p_options:
 		
 	var reconnect_tries: int = 3
 	while reconnect_tries:
-		http.poll()
+		if http.poll() != OK:
+			printerr("HTTP could not poll")
+			
 		if http.get_status() != HTTPClient.STATUS_CONNECTED:
-			http.connect_to_host(hostname, port, use_ssl, false)  # verify_host = false
-			while true:
-				yield(Engine.get_main_loop(), "idle_frame")
-				if terminated:
-					return
-				http.poll()
-				status = http.get_status()
-				
-				if cancelled:
-					cancelled = false
-					busy = false
-					return Result.new(godot_uro_helper_const.RequesterCode.CANCELLED, OK, -1)
+			if http.connect_to_host(hostname, port, use_ssl, false) == OK: # verify_host = false
+				while true:
+					yield(Engine.get_main_loop(), "idle_frame")
 					
-				if (
-					status
-					in [
-						HTTPClient.STATUS_CANT_CONNECT,
-						HTTPClient.STATUS_CANT_RESOLVE,
-						HTTPClient.STATUS_SSL_HANDSHAKE_ERROR,
-					]
-				):
-					busy = false
-					return get_status_error_response(status)
+					if terminated:
+						return
+						
+					if http.poll() != OK:
+						printerr("HTTP could not poll")
+						
+					status = http.get_status()
 					
-				if status == HTTPClient.STATUS_CONNECTED:
-					break
+					if cancelled:
+						cancelled = false
+						busy = false
+						return Result.new(godot_uro_helper_const.RequesterCode.CANCELLED, OK, -1)
+						
+					if (
+						status
+						in [
+							HTTPClient.STATUS_CANT_CONNECT,
+							HTTPClient.STATUS_CANT_RESOLVE,
+							HTTPClient.STATUS_SSL_HANDSHAKE_ERROR,
+						]
+					):
+						busy = false
+						return get_status_error_response(status)
+						
+					if status == HTTPClient.STATUS_CONNECTED:
+						break
+			else:
+				printerr("GodotUroRequester: could not connect to host")
+				return Result.new(godot_uro_helper_const.RequesterCode.FAILED_TO_CONNECT, OK, -1)
 					
 		if cancelled:
 			cancelled = false
@@ -170,8 +179,11 @@ func request(p_path: String, p_payload: Dictionary, p_use_token: int, p_options:
 		if token and token is String:
 			headers.append("Authorization: Bearer %s" % token)
 			
-		http.request_raw(_get_option(p_options, "method"), uri, headers, encoded_payload)
-		http.poll()
+		assert(http.request_raw(_get_option(p_options, "method"), uri, headers, encoded_payload) == OK)
+		
+		if http.poll() != OK:
+			printerr("HTTP could not poll")
+			
 		status = http.get_status()
 		if (
 			status
@@ -204,7 +216,9 @@ func request(p_path: String, p_payload: Dictionary, p_use_token: int, p_options:
 			busy = false
 			return Result.new(godot_uro_helper_const.RequesterCode.CANCELLED, OK, -1)
 			
-		http.poll()
+		if http.poll() != OK:
+			printerr("HTTP could not poll")
+			
 		status = http.get_status()
 		if (
 			status
@@ -277,7 +291,9 @@ func request(p_path: String, p_payload: Dictionary, p_use_token: int, p_options:
 				busy = false
 				return Result.new(godot_uro_helper_const.RequesterCode.CANCELLED, OK, -1)
 				
-		http.poll()
+		if http.poll() != OK:
+			printerr("HTTP could not poll")
+			
 		status = http.get_status()
 		if (
 			status in [
@@ -310,23 +326,30 @@ func request(p_path: String, p_payload: Dictionary, p_use_token: int, p_options:
 	if file:
 		file.close()
 		
-	var data = null
-	if file:
-		data = bytes
-	else:
-		if response_body:
-			var json_validation_result: String = validate_json(response_body)
-			if json_validation_result == "":
-				var json_parse_result: JSONParseResult = JSON.parse(response_body)
-				if json_parse_result.error == OK:
+	var data: Dictionary = {}
+	if response_body:
+		var json_validation_result: String = validate_json(response_body)
+		if json_validation_result == "":
+			var json_parse_result: JSONParseResult = JSON.parse(response_body)
+			if json_parse_result.error == OK:
+				if typeof(json_parse_result.result) == TYPE_DICTIONARY:
 					data = json_parse_result.result
-			else:
-				printerr("JSON validation result: %s" % json_validation_result)
+				else:
+					data = {"data":str(json_parse_result.result)}
 				
-	if response_code == HTTPClient.RESPONSE_OK:
-		return Result.new(godot_uro_helper_const.RequesterCode.OK, OK, response_code, data)
+				if response_code == HTTPClient.RESPONSE_OK:
+					return Result.new(godot_uro_helper_const.RequesterCode.OK, OK, response_code, data)
+				else:
+					return Result.new(godot_uro_helper_const.RequesterCode.HTTP_RESPONSE_NOT_OK, FAILED, response_code, data)
+			else:
+				printerr("GodotUroRequester: JSON parse result: %s" % str(json_parse_result.error))
+				return Result.new(godot_uro_helper_const.RequesterCode.JSON_PARSE_ERROR, FAILED, response_code, data)
+		else:
+			printerr("GodotUroRequester: JSON validation result: %s" % json_validation_result)
+			return Result.new(godot_uro_helper_const.RequesterCode.JSON_VALIDATE_ERROR, FAILED, response_code, data)
 	else:
-		return Result.new(godot_uro_helper_const.RequesterCode.HTTP_RESPONSE_NOT_OK, FAILED, response_code, data)
+		printerr("GodotUroRequester: No response body!")
+		return Result.new(godot_uro_helper_const.RequesterCode.NO_RESPONSE_BODY, FAILED, response_code, data)
 	
 	
 func _get_option(options, key):

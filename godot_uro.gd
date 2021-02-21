@@ -19,8 +19,6 @@ const godot_uro_request_const = preload("godot_uro_requester.gd")
 
 var godot_uro_api: godot_uro_api_const = null
 
-signal request_shard_list_callback(p_result)
-
 func get_uro_config_path() -> String:
 	if Engine.is_editor_hint():
 		return EDITOR_CONFIG_FILE_PATH
@@ -83,9 +81,10 @@ func setup_configuration() -> void:
 
 func _init():
 	cfg = ConfigFile.new()
-	cfg.load(get_uro_config_path())
-
-	setup_configuration()
-	
+	if cfg.load(get_uro_config_path()) == OK:
+		setup_configuration()
+	else:
+		printerr("GodotUro: can't load configuration file")
+		
 	if godot_uro_api == null:
 		godot_uro_api = godot_uro_api_const.new(self)

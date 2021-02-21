@@ -49,7 +49,11 @@ enum RequesterCode {
 	FILE_ERROR,
 	HTTP_RESPONSE_NOT_OK,
 	NO_TOKEN,
-	MALFORMED_RESPONSE_DATA
+	MALFORMED_RESPONSE_DATA,
+	JSON_PARSE_ERROR,
+	JSON_VALIDATE_ERROR,
+	NO_RESPONSE_BODY,
+	FAILED_TO_CONNECT
 }
 
 static func get_string_for_requester_code(p_requester_code: int) -> String:
@@ -76,6 +80,14 @@ static func get_string_for_requester_code(p_requester_code: int) -> String:
 			return "NO_TOKEN"
 		RequesterCode.MALFORMED_RESPONSE_DATA:
 			return "MALFORMED_RESPONSE_DATA"
+		RequesterCode.JSON_PARSE_ERROR:
+			return "JSON_PARSE_ERROR"
+		RequesterCode.JSON_VALIDATE_ERROR:
+			return "JSON_VALIDATE_ERROR"
+		RequesterCode.NO_RESPONSE_BODY:
+			return "NO_RESPONSE_BODY"
+		RequesterCode.FAILED_TO_CONNECT:
+			return "FAILED_TO_CONNECT"
 		_:
 			return "UNKNOWN_REQUESTER_ERROR"
 			
@@ -120,7 +132,6 @@ static func get_value_of_type(p_data: Dictionary, p_key: String, p_type: int, p_
 
 static func process_session_json(p_input: Dictionary) -> Dictionary:
 	if requester_result_has_response(p_input):
-		var http_response_code: int = p_input["response_code"]
 		if requester_result_is_ok(p_input):
 			var output = p_input["output"]
 			if output is Dictionary:
@@ -181,13 +192,6 @@ static func process_session_json(p_input: Dictionary) -> Dictionary:
 			"response_code":p_input["response_code"],
 			"message":"Response error!"
 		}
-	
-	return {
-		"requester_code":p_input["requester_code"],
-		"generic_code":p_input["generic_code"],
-		"response_code":p_input["response_code"],
-		"message":"Unknown error!"
-	}
 
 static func process_shards_json(p_input: Dictionary) -> Dictionary:
 	var result_dict: Dictionary = {}
@@ -199,7 +203,7 @@ static func process_shards_json(p_input: Dictionary) -> Dictionary:
 		if shards is Array:
 			for shard in shards:
 				if shard is Dictionary:
-					var new_shard: Dictionary
+					var new_shard: Dictionary = {}
 					new_shard["user"] = get_value_of_type(shard, "user", TYPE_STRING, "")
 					new_shard["address"] = get_value_of_type(shard, "address", TYPE_STRING, "")
 					new_shard["port"] = get_value_of_type(shard, "port", TYPE_REAL, -1)
