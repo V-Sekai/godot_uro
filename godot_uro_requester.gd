@@ -88,10 +88,12 @@ func request(p_path: String, p_payload: Dictionary, p_use_token: int, p_options:
 	while busy and ! terminated:
 		yield(Engine.get_main_loop(), "idle_frame")
 		if terminated:
-			return
+			return Result.new(godot_uro_helper_const.RequesterCode.TERMINATED, OK, -1)
 			
 	var status: int = HTTPClient.STATUS_DISCONNECTED
 	busy = true
+	
+	var _poll_error: int = OK
 	
 	if cancelled:
 		cancelled = false
@@ -100,19 +102,16 @@ func request(p_path: String, p_payload: Dictionary, p_use_token: int, p_options:
 		
 	var reconnect_tries: int = 3
 	while reconnect_tries:
-		if http.poll() != OK:
-			printerr("HTTP could not poll")
-			
+		_poll_error = http.poll()
 		if http.get_status() != HTTPClient.STATUS_CONNECTED:
 			if http.connect_to_host(hostname, port, use_ssl, false) == OK: # verify_host = false
 				while true:
 					yield(Engine.get_main_loop(), "idle_frame")
 					
 					if terminated:
-						return
-						
-					if http.poll() != OK:
-						printerr("HTTP could not poll")
+						return Result.new(godot_uro_helper_const.RequesterCode.TERMINATED, OK, -1)
+									
+					_poll_error = http.poll()
 						
 					status = http.get_status()
 					
@@ -181,8 +180,7 @@ func request(p_path: String, p_payload: Dictionary, p_use_token: int, p_options:
 			
 		assert(http.request_raw(_get_option(p_options, "method"), uri, headers, encoded_payload) == OK)
 		
-		if http.poll() != OK:
-			printerr("HTTP could not poll")
+		_poll_error = http.poll()
 			
 		status = http.get_status()
 		if (
@@ -209,15 +207,14 @@ func request(p_path: String, p_payload: Dictionary, p_use_token: int, p_options:
 	while true:
 		yield(Engine.get_main_loop(), "idle_frame")
 		if terminated:
-			return
+			return Result.new(godot_uro_helper_const.RequesterCode.TERMINATED, OK, -1)
 		if cancelled:
 			http.close()
 			cancelled = false
 			busy = false
 			return Result.new(godot_uro_helper_const.RequesterCode.CANCELLED, OK, -1)
 			
-		if http.poll() != OK:
-			printerr("HTTP could not poll")
+		_poll_error = http.poll()
 			
 		status = http.get_status()
 		if (
@@ -282,7 +279,7 @@ func request(p_path: String, p_payload: Dictionary, p_use_token: int, p_options:
 			if terminated:
 				if file:
 					file.close()
-				return
+				return Result.new(godot_uro_helper_const.RequesterCode.TERMINATED, OK, -1)
 			if cancelled:
 				http.close()
 				if file:
@@ -291,8 +288,7 @@ func request(p_path: String, p_payload: Dictionary, p_use_token: int, p_options:
 				busy = false
 				return Result.new(godot_uro_helper_const.RequesterCode.CANCELLED, OK, -1)
 				
-		if http.poll() != OK:
-			printerr("HTTP could not poll")
+		_poll_error = http.poll()
 			
 		status = http.get_status()
 		if (
@@ -312,7 +308,7 @@ func request(p_path: String, p_payload: Dictionary, p_use_token: int, p_options:
 	if terminated:
 		if file:
 			file.close()
-		return
+		return Result.new(godot_uro_helper_const.RequesterCode.TERMINATED, OK, -1)
 	if cancelled:
 		http.close()
 		if file:

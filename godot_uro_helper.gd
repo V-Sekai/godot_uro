@@ -40,6 +40,7 @@ const UNKNOWN_MAP = "UNKNOWN_MAP"
 enum RequesterCode {
 	OK,
 	CANCELLED,
+	TERMINATED,
 	CANT_CONNECT,
 	CANT_RESOLVE,
 	SSL_HANDSHAKE_ERROR,
@@ -53,7 +54,8 @@ enum RequesterCode {
 	JSON_PARSE_ERROR,
 	JSON_VALIDATE_ERROR,
 	NO_RESPONSE_BODY,
-	FAILED_TO_CONNECT
+	FAILED_TO_CONNECT,
+	POLL_ERROR
 }
 
 static func get_string_for_requester_code(p_requester_code: int) -> String:
@@ -62,6 +64,8 @@ static func get_string_for_requester_code(p_requester_code: int) -> String:
 			return "OK"
 		RequesterCode.CANCELLED:
 			return "CANCELLED"
+		RequesterCode.TERMINATED:
+			return "TERMINATED"
 		RequesterCode.CANT_RESOLVE:
 			return "CANT_RESOLVE"
 		RequesterCode.SSL_HANDSHAKE_ERROR:
@@ -88,14 +92,18 @@ static func get_string_for_requester_code(p_requester_code: int) -> String:
 			return "NO_RESPONSE_BODY"
 		RequesterCode.FAILED_TO_CONNECT:
 			return "FAILED_TO_CONNECT"
+		RequesterCode.POLL_ERROR:
+			return "POLL_ERROR"
 		_:
 			return "UNKNOWN_REQUESTER_ERROR"
 			
 static func get_full_requester_error_string(p_requester: Dictionary) -> String:
 	if p_requester["requester_code"] == RequesterCode.FILE_ERROR:
-		return ("%s: code: %s" % [get_string_for_requester_code(p_requester["requester_code"]), p_requester["generic_code"]])
+		return ("%s (error code: %s)" % [get_string_for_requester_code(p_requester["requester_code"]), p_requester["generic_code"]])
 	elif p_requester["requester_code"] == RequesterCode.HTTP_RESPONSE_NOT_OK:
-		return ("%s: code: %s" % [get_string_for_requester_code(p_requester["requester_code"]), p_requester["response_code"]])
+		return ("%s (error code: %s)" % [get_string_for_requester_code(p_requester["requester_code"]), p_requester["response_code"]])
+	elif p_requester["requester_code"] == RequesterCode.POLL_ERROR:
+		return ("%s (error code: %s)" % [get_string_for_requester_code(p_requester["requester_code"]), p_requester["generic_code"]])
 	else:
 		return (get_string_for_requester_code(p_requester["requester_code"]))
 			
@@ -183,14 +191,14 @@ static func process_session_json(p_input: Dictionary) -> Dictionary:
 				"requester_code":RequesterCode.MALFORMED_RESPONSE_DATA,
 				"generic_code":p_input["generic_code"],
 				"response_code":p_input["response_code"],
-				"message":"[NULL]"
+				"message":get_full_requester_error_string(p_input)
 			}
 	else:
 		return {
 			"requester_code":p_input["requester_code"],
 			"generic_code":p_input["generic_code"],
 			"response_code":p_input["response_code"],
-			"message":"Response error!"
+			"message":get_full_requester_error_string(p_input)
 		}
 
 static func process_shards_json(p_input: Dictionary) -> Dictionary:
