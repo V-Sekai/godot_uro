@@ -1,12 +1,12 @@
-tool
-extends Reference
+@tool
+extends RefCounted
 
-enum UroUserContentType {
-	UNKNOWN,
-	AVATAR,
-	MAP,
-	PROP
-}
+class  UroUserContentType :
+	const UNKNOWN=0
+	const AVATAR=1
+	const MAP=2
+	const PROP=3
+
 
 const LOCALHOST_HOST = "127.0.0.1"
 const LOCALHOST_PORT = 4000
@@ -37,26 +37,26 @@ const DEFAULT_ACCOUNT_DISPLAY_NAME = "UNKNOWN_DISPLAY_NAME"
 const UNTITLED_SHARD = "UNTITLED_SHARD"
 const UNKNOWN_MAP = "UNKNOWN_MAP"
 
-enum RequesterCode {
-	OK,
-	CANCELLED,
-	TERMINATED,
-	CANT_CONNECT,
-	CANT_RESOLVE,
-	SSL_HANDSHAKE_ERROR,
-	DISCONNECTED,
-	CONNECTION_ERROR,
-	UNKNOWN_STATUS_ERROR,
-	FILE_ERROR,
-	HTTP_RESPONSE_NOT_OK,
-	NO_TOKEN,
-	MALFORMED_RESPONSE_DATA,
-	JSON_PARSE_ERROR,
-	JSON_VALIDATE_ERROR,
-	NO_RESPONSE_BODY,
-	FAILED_TO_CONNECT,
-	POLL_ERROR
-}
+class  RequesterCode :
+	const OK=0
+	const CANCELLED=1
+	const TERMINATED=2
+	const CANT_CONNECT=3
+	const CANT_RESOLVE=4
+	const SSL_HANDSHAKE_ERROR=5
+	const DISCONNECTED=6
+	const CONNECTION_ERROR=7
+	const UNKNOWN_STATUS_ERROR=8
+	const FILE_ERROR=9
+	const HTTP_RESPONSE_NOT_OK=10
+	const NO_TOKEN=11
+	const MALFORMED_RESPONSE_DATA=12
+	const JSON_PARSE_ERROR=13
+	const JSON_VALIDATE_ERROR=14
+	const NO_RESPONSE_BODY=15
+	const FAILED_TO_CONNECT=16
+	const POLL_ERROR=17
+
 
 static func get_string_for_requester_code(p_requester_code: int) -> String:
 	match p_requester_code:
@@ -145,8 +145,8 @@ static func process_session_json(p_input: Dictionary) -> Dictionary:
 			if output is Dictionary:
 				var data = output.get("data")
 				if data is Dictionary:
-					var renewel_token: String = get_value_of_type(data, "renewal_token", TYPE_STRING, GodotUro.renewal_token)
-					var access_token: String = get_value_of_type(data, "access_token", TYPE_STRING, GodotUro.access_token)
+					var renewel_token: String = get_value_of_type(data, "renewal_token", TYPE_STRING, GodotUroData.renewal_token)
+					var access_token: String = get_value_of_type(data, "access_token", TYPE_STRING, GodotUroData.access_token)
 					
 					var user: Dictionary = get_value_of_type(data, "user", TYPE_DICTIONARY, {})
 					
@@ -214,11 +214,11 @@ static func process_shards_json(p_input: Dictionary) -> Dictionary:
 					var new_shard: Dictionary = {}
 					new_shard["user"] = get_value_of_type(shard, "user", TYPE_STRING, "")
 					new_shard["address"] = get_value_of_type(shard, "address", TYPE_STRING, "")
-					new_shard["port"] = get_value_of_type(shard, "port", TYPE_REAL, -1)
+					new_shard["port"] = get_value_of_type(shard, "port", TYPE_FLOAT, -1)
 					new_shard["map"] = get_value_of_type(shard, "map", TYPE_STRING, UNKNOWN_MAP)
 					new_shard["name"] = get_value_of_type(shard, "name", TYPE_STRING, UNTITLED_SHARD)
-					new_shard["current_users"] = get_value_of_type(shard, "current_users", TYPE_REAL, 0)
-					new_shard["max_users"] = get_value_of_type(shard, "max_users", TYPE_REAL, 0)
+					new_shard["current_users"] = get_value_of_type(shard, "current_users", TYPE_FLOAT, 0)
+					new_shard["max_users"] = get_value_of_type(shard, "max_users", TYPE_FLOAT, 0)
 					
 					new_shards.push_back(new_shard)
 					

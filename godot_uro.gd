@@ -1,10 +1,18 @@
-tool
+@tool
 extends Node
 
 const godot_uro_helper_const = preload("godot_uro_helper.gd")
 
-var renewal_token: String = ""
-var access_token: String = ""
+@export var renewal_token: String:
+	get:
+		return GodotUroData.get("renewal_token")
+	set(t):
+		GodotUroData.set("renewal_token", t)
+@export var access_token: String:
+	get:
+		return GodotUroData.get("access_token")
+	set(t):
+		GodotUroData.set("access_token", t)
 var cfg: ConfigFile = null
 
 var use_localhost: bool = true
@@ -17,7 +25,7 @@ const GAME_CONFIG_FILE_PATH = "user://uro.ini"
 const godot_uro_api_const = preload("godot_uro_api.gd")
 const godot_uro_request_const = preload("godot_uro_requester.gd")
 
-var godot_uro_api: godot_uro_api_const = null
+var godot_uro_api: RefCounted = null
 
 func get_uro_config_path() -> String:
 	if Engine.is_editor_hint():
@@ -49,7 +57,7 @@ func get_host_and_port() -> Dictionary:
 func using_ssl() -> bool:
 	return uro_using_ssl
 	
-func create_requester() -> godot_uro_request_const:
+func create_requester(): # godot_uro_request_const
 	var host_and_port: Dictionary = get_host_and_port()
 
 	var new_requester = godot_uro_request_const.new(

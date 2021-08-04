@@ -1,4 +1,4 @@
-tool
+@tool
 extends EditorPlugin
 
 const uro_logo_const = preload("uro_logo.png")
@@ -6,7 +6,7 @@ var editor_interface: EditorInterface = null
 var button: Button = null
 
 
-func _init() -> void:
+func _init():
 	print("Initialising GodotUro plugin")
 
 
@@ -16,15 +16,17 @@ func _notification(p_notification: int):
 			print("Destroying GodotUro plugin")
 
 
-func get_name() -> String:
+func _get_plugin_name() -> String:
 	return "GodotUro"
 
 
 func _enter_tree() -> void:
 	editor_interface = get_editor_interface()
 
+	add_autoload_singleton("GodotUroData", "res://addons/godot_uro/godot_uro_data.gd")
 	add_autoload_singleton("GodotUro", "res://addons/godot_uro/godot_uro.gd")
 
 
 func _exit_tree() -> void:
 	remove_autoload_singleton("GodotUro")
+	remove_autoload_singleton("GodotUroData")
