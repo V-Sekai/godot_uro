@@ -3,16 +3,7 @@ extends Node
 
 const godot_uro_helper_const = preload("godot_uro_helper.gd")
 
-@export var renewal_token: String:
-	get:
-		return GodotUroData.get("renewal_token")
-	set(t):
-		GodotUroData.set("renewal_token", t)
-@export var access_token: String:
-	get:
-		return GodotUroData.get("access_token")
-	set(t):
-		GodotUroData.set("access_token", t)
+# renewal_token and access_token have moved to GodotUroData.
 var cfg: ConfigFile = null
 
 var use_localhost: bool = true
