@@ -354,11 +354,11 @@ func _get_option(options, key):
 static func _compose_multipart_body(p_dictionary: Dictionary, p_boundary_string: String) -> PackedByteArray:
 	var buffer: PackedByteArray = PackedByteArray()
 	for key in p_dictionary.keys():
-		buffer.append_array(("\r\n--" + p_boundary_string + "\r\n").to_ascii_buffer())
+		buffer.append_array(("\r\n--" + p_boundary_string + "\r\n").to_utf8_buffer())
 		var value = p_dictionary[key]
 		if value is String:
-			var disposition: PackedByteArray = ("Content-Disposition: form-data; name=\"%s\"\r\n\r\n" % key).to_ascii()
-			var body: PackedByteArray = value.to_utf8()
+			var disposition: PackedByteArray = ("Content-Disposition: form-data; name=\"%s\"\r\n\r\n" % key).to_utf8_buffer()
+			var body: PackedByteArray = value.to_utf8_buffer()
 			
 			buffer.append_array(disposition)
 			buffer.append_array(body)
@@ -367,13 +367,13 @@ static func _compose_multipart_body(p_dictionary: Dictionary, p_boundary_string:
 			var filename: String = value.get("filename")
 			var data: PackedByteArray = value.get("data")
 			
-			var disposition = ("Content-Disposition: form-data; name=\"%s\"; filename=\"%s\"\r\nContent-Type: %s\r\n\r\n" % [key, filename, content_type]).to_ascii_buffer()
+			var disposition = ("Content-Disposition: form-data; name=\"%s\"; filename=\"%s\"\r\nContent-Type: %s\r\n\r\n" % [key, filename, content_type]).to_utf8_buffer()
 			var body: PackedByteArray = data
 
 			buffer.append_array(disposition)
 			buffer.append_array(body)
 		
-	buffer.append_array(("\r\n--" + p_boundary_string + "--\r\n").to_ascii_buffer())
+	buffer.append_array(("\r\n--" + p_boundary_string + "--\r\n").to_utf8_buffer())
 
 	return buffer
 	

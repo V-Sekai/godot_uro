@@ -95,7 +95,7 @@ static func get_string_for_requester_code(p_requester_code: int) -> String:
 		RequesterCode.POLL_ERROR:
 			return "POLL_ERROR"
 		_:
-			return "UNKNOWN_REQUESTER_ERROR"
+			return "UNKNOWN_REQUESTER_ERROR (" + str(p_requester_code) + ")"
 			
 static func get_full_requester_error_string(p_requester: Dictionary) -> String:
 	if p_requester["requester_code"] == RequesterCode.FILE_ERROR:
