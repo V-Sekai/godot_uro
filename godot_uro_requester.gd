@@ -169,7 +169,7 @@ func request(p_path: String, p_payload: Dictionary, p_use_token: int, p_options:
 					var payload_string: String = _dict_to_query_string(p_payload)
 					encoded_payload = payload_string.to_utf8_buffer()
 				"multipart":
-					var boundary_string: String = BOUNDARY_STRING_PREFIX + random_const.generate_unique_id(BOUNDARY_STRING_LENGTH)
+					var boundary_string: String = BOUNDARY_STRING_PREFIX + random_const.generate_insecure_unique_id(BOUNDARY_STRING_LENGTH)
 					headers.append("Content-Type: multipart/form-data; boundary=%s" % boundary_string)
 					encoded_payload = _compose_multipart_body(p_payload, boundary_string)
 				_:
