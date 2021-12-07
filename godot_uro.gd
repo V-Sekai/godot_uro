@@ -1,7 +1,7 @@
 @tool
 extends Node
 
-const godot_uro_helper_const = preload("godot_uro_helper.gd")
+const godot_uro_helper_const = preload("res://addons/godot_uro/godot_uro_helper.gd")
 
 # renewal_token and access_token have moved to GodotUroData.
 var cfg: ConfigFile = null
@@ -13,8 +13,8 @@ var uro_using_ssl: bool = true
 
 const EDITOR_CONFIG_FILE_PATH = "user://uro_editor.ini"
 const GAME_CONFIG_FILE_PATH = "user://uro.ini"
-const godot_uro_api_const = preload("godot_uro_api.gd")
-const godot_uro_request_const = preload("godot_uro_requester.gd")
+const godot_uro_api_const = preload("res://addons/godot_uro/godot_uro_api.gd")
+const godot_uro_request_const = preload("res://addons/godot_uro/godot_uro_requester.gd")
 
 var godot_uro_api: RefCounted = null
 
