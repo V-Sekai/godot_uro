@@ -80,10 +80,11 @@ func setup_configuration() -> void:
 
 func _init():
 	cfg = ConfigFile.new()
-	if cfg.load(get_uro_config_path()) == OK:
-		setup_configuration()
-	else:
-		printerr("GodotUro: can't load configuration file")
+	if cfg.load(get_uro_config_path()) != OK:
+		if cfg.save(get_uro_config_path()) != OK:
+			printerr("Could not save token!")
+		
+	setup_configuration()
 		
 	if godot_uro_api == null:
 		godot_uro_api = godot_uro_api_const.new(self)
