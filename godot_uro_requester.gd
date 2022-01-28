@@ -188,6 +188,8 @@ func request(p_path: String, p_payload: Dictionary, p_use_token: int, p_options:
 		if (
 			status
 			in [
+				HTTPClient.STATUS_RESOLVING,
+				HTTPClient.STATUS_CONNECTING,
 				HTTPClient.STATUS_CONNECTED,
 				HTTPClient.STATUS_BODY,
 				HTTPClient.STATUS_REQUESTING,
@@ -219,6 +221,7 @@ func request(p_path: String, p_payload: Dictionary, p_use_token: int, p_options:
 		_poll_error = http.poll()
 			
 		status = http.get_status()
+		# print("NEXT FRAME: " + str(status))
 		if (
 			status
 			in [
@@ -293,11 +296,9 @@ func request(p_path: String, p_payload: Dictionary, p_use_token: int, p_options:
 		_poll_error = http.poll()
 			
 		status = http.get_status()
+		# print("FINAL STATUS: " + str(status))
 		if (
-			status in [
-				HTTPClient.STATUS_DISCONNECTED,
-				HTTPClient.STATUS_CONNECTION_ERROR
-				]
+			status == HTTPClient.STATUS_CONNECTION_ERROR
 			and ! terminated
 			and ! cancelled
 		):
