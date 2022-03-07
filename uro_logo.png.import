@@ -3,7 +3,7 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://6of8xt783o7g"
-path="res://.godot/imported/uro_logo.png-f329a1e1104de752bdce8e1794c2efd6.stex"
+path="res://.godot/imported/uro_logo.png-f329a1e1104de752bdce8e1794c2efd6.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://addons/godot_uro/uro_logo.png"
-dest_files=["res://.godot/imported/uro_logo.png-f329a1e1104de752bdce8e1794c2efd6.stex"]
+dest_files=["res://.godot/imported/uro_logo.png-f329a1e1104de752bdce8e1794c2efd6.ctex"]
 
 [params]
 
