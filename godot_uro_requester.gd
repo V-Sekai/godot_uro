@@ -55,7 +55,7 @@ func cancel():
 		print("uro request cancelled!")
 		cancelled = true
 	else:
-		call_deferred("emit_signal", "completed", null)
+		self.completed.emit.call_deferred(null)
 	await self.completed
 	
 	
@@ -272,7 +272,7 @@ func request(p_path: String, p_payload: Dictionary, p_use_token: int, p_options:
 		if file:
 			file.store_buffer(chunk)
 			bytes += chunk.size()
-			emit_signal("download_progressed", bytes, total_bytes)
+			self.download_progressed.emit(bytes, total_bytes)
 		else:
 			response_body = response_body if response_body else ""
 			response_body += chunk.get_string_from_utf8()
