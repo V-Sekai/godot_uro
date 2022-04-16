@@ -162,7 +162,8 @@ func request(p_path: String, p_payload: Dictionary, p_use_token: int, p_options:
 					uri += "?%s" % _dict_to_query_string(p_payload)
 				"json":
 					headers.append("Content-Type: application/json")
-					var payload_string: String = JSON.print(p_payload)
+					var json: JSON = JSON.new()
+					var payload_string: String = json.stringify(p_payload)
 					encoded_payload = payload_string.to_utf8_buffer()
 				"form":
 					headers.append("Content-Type: application/x-www-form-urlencoded")
