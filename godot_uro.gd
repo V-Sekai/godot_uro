@@ -1,7 +1,8 @@
 @tool
 extends Node
 
-const godot_uro_helper_const = preload("res://addons/godot_uro/godot_uro_helper.gd")
+const godot_uro_helper_const = preload("./godot_uro_helper.gd")
+const http_pool_const = preload("./http_pool.gd")
 
 # renewal_token and access_token have moved to GodotUroData.
 var cfg: ConfigFile = null
@@ -13,10 +14,11 @@ var uro_using_ssl: bool = true
 
 const EDITOR_CONFIG_FILE_PATH = "user://uro_editor.ini"
 const GAME_CONFIG_FILE_PATH = "user://uro.ini"
-const godot_uro_api_const = preload("res://addons/godot_uro/godot_uro_api.gd")
-const godot_uro_request_const = preload("res://addons/godot_uro/godot_uro_requester.gd")
+const godot_uro_api_const = preload("./godot_uro_api.gd")
+const godot_uro_request_const = preload("./godot_uro_requester.gd")
 
 var godot_uro_api: RefCounted = null
+var http_pool = http_pool_const.new()
 
 func get_uro_config_path() -> String:
 	if Engine.is_editor_hint():
@@ -51,7 +53,7 @@ func using_ssl() -> bool:
 func create_requester(): # godot_uro_request_const
 	var host_and_port: Dictionary = get_host_and_port()
 
-	var new_requester = godot_uro_request_const.new(
+	var new_requester = godot_uro_request_const.new(http_pool,
 		host_and_port.host, host_and_port.port, using_ssl()
 	)
 	
@@ -77,6 +79,9 @@ func setup_configuration() -> void:
 		ProjectSettings.set_setting("services/uro/use_ssl", uro_using_ssl)
 	else:
 		uro_using_ssl = ProjectSettings.get_setting("services/uro/use_ssl")
+
+func _ready():
+	add_child(http_pool)
 
 func _init():
 	cfg = ConfigFile.new()
