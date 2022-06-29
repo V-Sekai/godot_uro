@@ -204,6 +204,26 @@ static func _compose_multipart_body(p_dictionary: Dictionary, p_boundary_string:
 
 			buffer.append_array(disposition)
 			buffer.append_array(body)
+		elif value is bool:
+			var disposition: PackedByteArray = ("Content-Disposition: form-data; name=\"%s\"\r\n\r\n" % key).to_utf8_buffer()
+			var body: PackedByteArray = "true".to_utf8_buffer() if value == true else "false".to_utf8_buffer()
+			
+			buffer.append_array(disposition)
+			buffer.append_array(body)
+		elif value is int:
+			var disposition: PackedByteArray = ("Content-Disposition: form-data; name=\"%s\"\r\n\r\n" % key).to_utf8_buffer()
+			var body: PackedByteArray = value.to_string().to_utf8_buffer()
+			
+			buffer.append_array(disposition)
+			buffer.append_array(body)
+		elif value is float:
+			var disposition: PackedByteArray = ("Content-Disposition: form-data; name=\"%s\"\r\n\r\n" % key).to_utf8_buffer()
+			var body: PackedByteArray = value.to_string().to_utf8_buffer()
+			
+			buffer.append_array(disposition)
+			buffer.append_array(body)
+		else:
+			printerr("_compose_multipart_body: Unknown tpye!")
 		
 	buffer.append_array(("\r\n--" + p_boundary_string + "--\r\n").to_utf8_buffer())
 
