@@ -1,11 +1,12 @@
 @tool
 extends RefCounted
 
-class  UroUserContentType :
-	const UNKNOWN=0
-	const AVATAR=1
-	const MAP=2
-	const PROP=3
+enum UroUserContentType {
+	UNKNOWN,
+	AVATAR,
+	MAP,
+	PROP
+}
 
 
 const LOCALHOST_HOST = "127.0.0.1"
@@ -138,6 +139,22 @@ static func get_value_of_type(p_data: Dictionary, p_key: String, p_type: int, p_
 		return value
 	else:
 		return p_default_value
+		
+static func process_user_privilege_ruleset(p_data) -> Dictionary:
+	var ruleset: Dictionary = {}
+	
+	if typeof(p_data) == TYPE_DICTIONARY:
+		ruleset["is_admin"] = get_value_of_type(p_data, "is_admin", TYPE_BOOL, false)
+		ruleset["can_upload_avatars"] = get_value_of_type(p_data, "can_upload_avatars", TYPE_BOOL, false)
+		ruleset["can_upload_maps"] = get_value_of_type(p_data, "can_upload_maps", TYPE_BOOL, false)
+		ruleset["can_upload_props"] = get_value_of_type(p_data, "can_upload_props", TYPE_BOOL, false)
+	else:
+		ruleset["is_admin"] = false
+		ruleset["can_upload_avatars"] = false
+		ruleset["can_upload_maps"] = false
+		ruleset["can_upload_props"] = false
+		
+	return ruleset
 
 static func process_session_json(p_input: Dictionary) -> Dictionary:
 	if requester_result_has_response(p_input):
@@ -155,6 +172,7 @@ static func process_session_json(p_input: Dictionary) -> Dictionary:
 					var user_username: String = get_value_of_type(user, "username", TYPE_STRING, DEFAULT_ACCOUNT_USERNAME)
 					var user_display_name: String = get_value_of_type(user, "display_name", TYPE_STRING, DEFAULT_ACCOUNT_DISPLAY_NAME)
 					
+					var user_privilege_ruleset: Dictionary = process_user_privilege_ruleset(data.get("user_privilege_ruleset"))
 					
 					return {
 						"requester_code":p_input["requester_code"],
@@ -165,7 +183,8 @@ static func process_session_json(p_input: Dictionary) -> Dictionary:
 						"access_token":access_token,\
 						"user_id":user_id,\
 						"user_username":user_username,\
-						"user_display_name":user_display_name
+						"user_display_name":user_display_name,\
+						"user_privilege_ruleset":user_privilege_ruleset
 					}
 			return {
 				"requester_code":RequesterCode.MALFORMED_RESPONSE_DATA,

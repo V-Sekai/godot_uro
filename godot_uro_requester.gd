@@ -50,10 +50,11 @@ func _init(p_http_pool, p_hostname: String, p_port: int = -1, p_use_ssl: bool = 
 	has_enhanced_qs_from_dict = http_query_string.query_string_from_dict({"a": null}) == "a"
 	
 
-class  TokenType :
-	const NO_TOKEN=0
-	const RENEWAL_TOKEN=1
-	const ACCESS_TOKEN=2
+enum TokenType {
+	NO_TOKEN,
+	RENEWAL_TOKEN,
+	ACCESS_TOKEN
+}
 
 
 static func get_status_error_response(p_status: int) -> Result:
@@ -170,11 +171,10 @@ func request(p_path: String, p_payload: Dictionary, p_use_token: int, p_options:
 			else:
 				return Result.new(godot_uro_helper_const.RequesterCode.HTTP_RESPONSE_NOT_OK, FAILED, response_code, data)
 		else:
-			printerr("GodotUroRequester: JSON parse result: %s" % str(json_parse_result.error))
-			return Result.new(godot_uro_helper_const.RequesterCode.JSON_PARSE_ERROR, FAILED, response_code, data)
-		#else:
-		#	printerr("GodotUroRequester: JSON validation result: %s" % json_validation_result)
-		#	return Result.new(godot_uro_helper_const.RequesterCode.JSON_VALIDATE_ERROR, FAILED, response_code, data)
+			if response_code == HTTPClient.RESPONSE_OK:
+				return Result.new(godot_uro_helper_const.RequesterCode.JSON_PARSE_ERROR, FAILED, response_code, data)
+			else:
+				return Result.new(godot_uro_helper_const.RequesterCode.HTTP_RESPONSE_NOT_OK, FAILED, response_code, data)
 	else:
 		printerr("GodotUroRequester: No response body!")
 		return Result.new(godot_uro_helper_const.RequesterCode.UNKNOWN_STATUS_ERROR, FAILED, response_code, data)
