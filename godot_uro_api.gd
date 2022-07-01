@@ -44,7 +44,7 @@ func get_profile_async() -> Dictionary:
 	return _handle_result(result)
 
 
-func renew_session_async():
+func renew_session_async() -> Dictionary:
 	var query: Dictionary = {}
 
 	var result = await requester.request(
@@ -57,7 +57,7 @@ func renew_session_async():
 
 	return _handle_result(result)
 
-func sign_in_async(p_username_or_email: String, p_password: String):
+func sign_in_async(p_username_or_email: String, p_password: String) -> Dictionary:
 	var query: Dictionary = {
 		"user[username_or_email]": p_username_or_email,
 		"user[password]": p_password,
@@ -76,7 +76,7 @@ func sign_in_async(p_username_or_email: String, p_password: String):
 
 	return _handle_result(result)
 	
-func sign_out_async():
+func sign_out_async() -> Dictionary:
 	var query: Dictionary = {}
 
 	var result = await requester.request(
@@ -88,7 +88,7 @@ func sign_out_async():
 
 	return _handle_result(result)
 	
-func register_async(p_username: String, p_email: String, p_password: String, p_password_confirmation: String, p_email_notifications: bool):
+func register_async(p_username: String, p_email: String, p_password: String, p_password_confirmation: String, p_email_notifications: bool) -> Dictionary:
 	var query: Dictionary = {
 		"user[username]": p_username,
 		"user[email]": p_email,
@@ -133,7 +133,7 @@ func get_identity_proof_async(p_id: String) -> Dictionary:
 
 	return _handle_result(result)
 
-func create_shard_async(p_query: Dictionary):
+func create_shard_async(p_query: Dictionary) -> Dictionary:
 	var query: Dictionary = godot_uro_helper_const.populate_query(SHARD_NAME, p_query)
 
 	var result = await requester.request(
@@ -146,7 +146,7 @@ func create_shard_async(p_query: Dictionary):
 	return _handle_result(result)
 
 
-func delete_shard_async(p_id: String, p_query: Dictionary):
+func delete_shard_async(p_id: String, p_query: Dictionary) -> Dictionary:
 	var query: Dictionary = godot_uro_helper_const.populate_query(SHARD_NAME, p_query)
 
 	var result = await requester.request(
@@ -162,7 +162,7 @@ func delete_shard_async(p_id: String, p_query: Dictionary):
 	return _handle_result(result)
 
 
-func update_shard_async(p_id: String, p_query: Dictionary):
+func update_shard_async(p_id: String, p_query: Dictionary) -> Dictionary:
 	var query: Dictionary = godot_uro_helper_const.populate_query(SHARD_NAME, p_query)
 
 	var result = await requester.request(
@@ -178,7 +178,7 @@ func update_shard_async(p_id: String, p_query: Dictionary):
 	return _handle_result(result)
 
 
-func get_shards_async():
+func get_shards_async() -> Dictionary:
 	var query: Dictionary = godot_uro_helper_const.populate_query(SHARD_NAME, {})
 	
 	var result = await requester.request(
@@ -190,6 +190,18 @@ func get_shards_async():
 
 	return godot_uro_helper_const.process_shards_json(_handle_result(result))
 
+func get_avatars_async() -> Dictionary:
+	var query: Dictionary = godot_uro_helper_const.populate_query(AVATAR_NAME, {})
+	
+	var result = await requester.request(
+		godot_uro_helper_const.get_api_path() + godot_uro_helper_const.AVATARS_PATH,
+		query,
+		godot_uro_requester_const.TokenType.NO_TOKEN,
+		{"method": HTTPClient.METHOD_GET, "encoding": "form"}
+	)
+
+	return _handle_result(result)
+
 func get_avatar_async(p_id: String) -> Dictionary:
 	var query: Dictionary = {
 	}
@@ -198,6 +210,18 @@ func get_avatar_async(p_id: String) -> Dictionary:
 		godot_uro_helper_const.get_api_path() + godot_uro_helper_const.AVATARS_PATH + "/" + p_id,
 		query,
 		godot_uro_requester_const.TokenType.ACCESS_TOKEN,
+		{"method": HTTPClient.METHOD_GET, "encoding": "form"}
+	)
+
+	return _handle_result(result)
+	
+func get_maps_async() -> Dictionary:
+	var query: Dictionary = godot_uro_helper_const.populate_query(MAP_NAME, {})
+	
+	var result = await requester.request(
+		godot_uro_helper_const.get_api_path() + godot_uro_helper_const.MAPS_PATH,
+		query,
+		godot_uro_requester_const.TokenType.NO_TOKEN,
 		{"method": HTTPClient.METHOD_GET, "encoding": "form"}
 	)
 
