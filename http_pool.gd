@@ -178,7 +178,7 @@ class HTTPState:
 		status = http.get_status()
 		var connection = http.connection
 		if use_ssl and status == HTTPClient.STATUS_CONNECTED:
-			if connection is StreamPeerSSL:
+			if connection is StreamPeerTLS:
 				var underlying: StreamPeer
 				# TODO: underlying = connection.get_stream() # var connection_tcp = connection.get_stream()
 				if underlying is StreamPeerTCP:
@@ -192,7 +192,7 @@ class HTTPState:
 						return http
 		elif not use_ssl and status == HTTPClient.STATUS_CONNECTED:
 			if connection is StreamPeerTCP:
-				if (not (connection is StreamPeerSSL)) and status == HTTPClient.STATUS_CONNECTED and connection.get_connected_host() == hostname and connection.get_connected_port() == port:
+				if (not (connection is StreamPeerTLS)) and status == HTTPClient.STATUS_CONNECTED and connection.get_connected_host() == hostname and connection.get_connected_port() == port:
 					#print("Found cached http tcp connection " + str(hostname))
 					return http
 

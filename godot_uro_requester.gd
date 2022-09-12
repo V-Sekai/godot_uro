@@ -63,7 +63,7 @@ static func get_status_error_response(p_status: int) -> Result:
 			return Result.new(godot_uro_helper_const.RequesterCode.CANT_CONNECT, FAILED, -1)
 		HTTPClient.STATUS_CANT_RESOLVE:
 			return Result.new(godot_uro_helper_const.RequesterCode.CANT_RESOLVE, FAILED, -1)
-		HTTPClient.STATUS_SSL_HANDSHAKE_ERROR:
+		HTTPClient.STATUS_TLS_HANDSHAKE_ERROR:
 			return Result.new(godot_uro_helper_const.RequesterCode.SSL_HANDSHAKE_ERROR, FAILED, -1)
 		HTTPClient.STATUS_DISCONNECTED:
 			return Result.new(godot_uro_helper_const.RequesterCode.DISCONNECTED, FAILED, -1)
