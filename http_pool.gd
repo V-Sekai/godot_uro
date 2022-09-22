@@ -178,8 +178,7 @@ class HTTPState:
 		var connection = http.connection
 		if use_ssl and status == HTTPClient.STATUS_CONNECTED:
 			if connection is StreamPeerTLS:
-				var underlying: StreamPeer
-				# TODO: underlying = connection.get_stream() # var connection_tcp = connection.get_stream()
+				var underlying: StreamPeer = connection.get_stream()
 				if underlying is StreamPeerTCP:
 					if status == HTTPClient.STATUS_CONNECTED and underlying.get_connected_host() == hostname and underlying.get_connected_port() == port:
 						#print("Found cached https connection " + str(hostname))
@@ -237,7 +236,7 @@ class HTTPState:
 			self.http_pool = null
 			self.http = null
 
-func _process(ts: float):
+func _process(_ts: float):
 	http_tick.emit()
 
 func _init(p_http_client_limit: int = 5):
