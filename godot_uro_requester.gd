@@ -73,7 +73,7 @@ static func get_status_error_response(p_status: int) -> Result:
 			return Result.new(godot_uro_helper_const.RequesterCode.UNKNOWN_STATUS_ERROR, FAILED, -1)
 
 
-func http_download_progressed(http_state: RefCounted, bytes: int, total_bytes: int):
+func http_download_progressed(_http_state: RefCounted, _bytes: int, _total_bytes: int):
 	#print("Download progressed " + str(bytes) + "/" + str(total_bytes))
 	pass
 
