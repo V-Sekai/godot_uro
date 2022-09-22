@@ -30,7 +30,7 @@ class HTTPState:
 	var response_code: int
 	var response_body: PackedByteArray
 	var response_headers: Dictionary
-	var file: File
+	var file: FileAccess
 	var bytes: int
 	var total_bytes: int
 
@@ -128,9 +128,8 @@ class HTTPState:
 					else:
 						total_bytes = -1
 					if not out_path.is_empty():
-						file = File.new()
-						var err: int = file.open(out_path, File.WRITE)
-						if err != OK:
+						file = FileAccess.open(out_path, FileAccess.WRITE)
+						if file.is_null():
 							busy = false
 							status = HTTPClient.STATUS_CONNECTED # failed to write to file
 							return _request_finished.emit(false)
