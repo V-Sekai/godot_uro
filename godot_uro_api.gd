@@ -3,6 +3,7 @@ extends RefCounted
 
 const godot_uro_requester_const = preload("godot_uro_requester.gd")
 const godot_uro_helper_const = preload("godot_uro_helper.gd")
+const uro_api_const = preload("res://addons/godot_uro/godot_uro_api.gd")
 
 const USER_NAME = "user"
 const SHARD_NAME = "shard"
@@ -41,7 +42,7 @@ func get_profile_async() -> Dictionary:
 		{"method": HTTPClient.METHOD_GET, "encoding": "form"}
 	)
 
-	return _handle_result(result)
+	return uro_api_const._handle_result(result)
 
 
 func renew_session_async() -> Dictionary:
@@ -55,7 +56,7 @@ func renew_session_async() -> Dictionary:
 		{"method": HTTPClient.METHOD_POST, "encoding": "form"}
 	)
 
-	return _handle_result(result)
+	return uro_api_const._handle_result(result)
 
 func sign_in_async(p_username_or_email: String, p_password: String) -> Dictionary:
 	var query: Dictionary = {
@@ -74,7 +75,7 @@ func sign_in_async(p_username_or_email: String, p_password: String) -> Dictionar
 	
 	requester = new_requester
 
-	return _handle_result(result)
+	return uro_api_const._handle_result(result)
 	
 func sign_out_async() -> Dictionary:
 	var query: Dictionary = {}
@@ -86,7 +87,7 @@ func sign_out_async() -> Dictionary:
 		{"method": HTTPClient.METHOD_DELETE, "encoding": "form"}
 	)
 
-	return _handle_result(result)
+	return uro_api_const._handle_result(result)
 	
 func register_async(p_username: String, p_email: String, p_password: String, p_password_confirmation: String, p_email_notifications: bool) -> Dictionary:
 	var query: Dictionary = {
@@ -94,7 +95,7 @@ func register_async(p_username: String, p_email: String, p_password: String, p_p
 		"user[email]": p_email,
 		"user[password]": p_password,
 		"user[password_confirmation]": p_password_confirmation,
-		"user[email_notifications]": bool_to_string(p_email_notifications)
+		"user[email_notifications]": uro_api_const.bool_to_string(p_email_notifications)
 	}
 
 	var result = await requester.request(
@@ -104,7 +105,7 @@ func register_async(p_username: String, p_email: String, p_password: String, p_p
 		{"method": HTTPClient.METHOD_POST, "encoding": "form"}
 	)
 
-	return _handle_result(result)
+	return uro_api_const._handle_result(result)
 
 func create_identity_proof_for_async(p_id: String) -> Dictionary:
 	var query: Dictionary = {
@@ -118,7 +119,7 @@ func create_identity_proof_for_async(p_id: String) -> Dictionary:
 		{"method": HTTPClient.METHOD_POST, "encoding": "form"}
 	)
 
-	return _handle_result(result)
+	return uro_api_const._handle_result(result)
 	
 func get_identity_proof_async(p_id: String) -> Dictionary:
 	var query: Dictionary = {
@@ -131,7 +132,7 @@ func get_identity_proof_async(p_id: String) -> Dictionary:
 		{"method": HTTPClient.METHOD_GET, "encoding": "form"}
 	)
 
-	return _handle_result(result)
+	return uro_api_const._handle_result(result)
 
 func create_shard_async(p_query: Dictionary) -> Dictionary:
 	var query: Dictionary = godot_uro_helper_const.populate_query(SHARD_NAME, p_query)
@@ -143,7 +144,7 @@ func create_shard_async(p_query: Dictionary) -> Dictionary:
 		{"method": HTTPClient.METHOD_POST, "encoding": "form"}
 	)
 
-	return _handle_result(result)
+	return uro_api_const._handle_result(result)
 
 
 func delete_shard_async(p_id: String, p_query: Dictionary) -> Dictionary:
@@ -159,7 +160,7 @@ func delete_shard_async(p_id: String, p_query: Dictionary) -> Dictionary:
 		{"method": HTTPClient.METHOD_DELETE, "encoding": "form"}
 	)
 
-	return _handle_result(result)
+	return uro_api_const._handle_result(result)
 
 
 func update_shard_async(p_id: String, p_query: Dictionary) -> Dictionary:
@@ -175,7 +176,7 @@ func update_shard_async(p_id: String, p_query: Dictionary) -> Dictionary:
 		{"method": HTTPClient.METHOD_PUT, "encoding": "form"}
 	)
 
-	return _handle_result(result)
+	return uro_api_const._handle_result(result)
 
 
 func get_shards_async() -> Dictionary:
@@ -188,7 +189,7 @@ func get_shards_async() -> Dictionary:
 		{"method": HTTPClient.METHOD_GET, "encoding": "form"}
 	)
 
-	return godot_uro_helper_const.process_shards_json(_handle_result(result))
+	return godot_uro_helper_const.process_shards_json(uro_api_const._handle_result(result))
 
 func get_avatars_async() -> Dictionary:
 	var query: Dictionary = godot_uro_helper_const.populate_query(AVATAR_NAME, {})
@@ -200,7 +201,7 @@ func get_avatars_async() -> Dictionary:
 		{"method": HTTPClient.METHOD_GET, "encoding": "form"}
 	)
 
-	return _handle_result(result)
+	return uro_api_const._handle_result(result)
 
 func get_avatar_async(p_id: String) -> Dictionary:
 	var query: Dictionary = {
@@ -213,7 +214,7 @@ func get_avatar_async(p_id: String) -> Dictionary:
 		{"method": HTTPClient.METHOD_GET, "encoding": "form"}
 	)
 
-	return _handle_result(result)
+	return uro_api_const._handle_result(result)
 	
 func get_maps_async() -> Dictionary:
 	var query: Dictionary = godot_uro_helper_const.populate_query(MAP_NAME, {})
@@ -225,7 +226,7 @@ func get_maps_async() -> Dictionary:
 		{"method": HTTPClient.METHOD_GET, "encoding": "form"}
 	)
 
-	return _handle_result(result)
+	return uro_api_const._handle_result(result)
 	
 func get_map_async(p_id: String) -> Dictionary:
 	var query: Dictionary = {
@@ -238,7 +239,7 @@ func get_map_async(p_id: String) -> Dictionary:
 		{"method": HTTPClient.METHOD_GET, "encoding": "form"}
 	)
 
-	return _handle_result(result)
+	return uro_api_const._handle_result(result)
 	
 ## 
 ## Dashboard Avatar
@@ -259,7 +260,7 @@ func dashboard_get_avatars_async() -> Dictionary:
 	)
 	print("Path " + str(path) + " returned " + str(result) + " type " + str(typeof(result)))
 
-	return _handle_result(result)
+	return uro_api_const._handle_result(result)
 
 func dashboard_create_avatar_async(p_query: Dictionary) -> Dictionary:
 	var query: Dictionary = godot_uro_helper_const.populate_query(AVATAR_NAME, p_query)
@@ -275,7 +276,7 @@ func dashboard_create_avatar_async(p_query: Dictionary) -> Dictionary:
 		{"method": HTTPClient.METHOD_POST, "encoding": "multipart"}
 	)
 
-	return _handle_result(result)
+	return uro_api_const._handle_result(result)
 	
 func dashboard_update_avatar_async(p_id: String, p_query: Dictionary) -> Dictionary:
 	var query: Dictionary = godot_uro_helper_const.populate_query(AVATAR_NAME, p_query)
@@ -292,7 +293,7 @@ func dashboard_update_avatar_async(p_id: String, p_query: Dictionary) -> Diction
 		{"method": HTTPClient.METHOD_PUT, "encoding": "multipart"}
 	)
 
-	return _handle_result(result)
+	return uro_api_const._handle_result(result)
 	
 func dashboard_get_avatar_async(p_id: String) -> Dictionary:
 	var query: Dictionary = {}
@@ -309,7 +310,7 @@ func dashboard_get_avatar_async(p_id: String) -> Dictionary:
 		{"method": HTTPClient.METHOD_GET, "encoding": "form"}
 	)
 
-	return _handle_result(result)
+	return uro_api_const._handle_result(result)
 
 ## 
 ## Dashboard Map
@@ -330,7 +331,7 @@ func dashboard_get_maps_async() -> Dictionary:
 		{"method": HTTPClient.METHOD_GET, "encoding": "form"}
 	)
 
-	return _handle_result(result)
+	return uro_api_const._handle_result(result)
 
 func dashboard_create_map_async(p_query: Dictionary) -> Dictionary:
 	var query: Dictionary = godot_uro_helper_const.populate_query(MAP_NAME, p_query)
@@ -346,7 +347,7 @@ func dashboard_create_map_async(p_query: Dictionary) -> Dictionary:
 		{"method": HTTPClient.METHOD_POST, "encoding": "multipart"}
 	)
 
-	return _handle_result(result)
+	return uro_api_const._handle_result(result)
 	
 func dashboard_update_map_async(p_id: String, p_query: Dictionary) -> Dictionary:
 	var query: Dictionary = godot_uro_helper_const.populate_query(MAP_NAME, p_query)
@@ -363,7 +364,7 @@ func dashboard_update_map_async(p_id: String, p_query: Dictionary) -> Dictionary
 		{"method": HTTPClient.METHOD_PUT, "encoding": "multipart"}
 	)
 
-	return _handle_result(result)
+	return uro_api_const._handle_result(result)
 	
 func dashboard_get_map_async(p_id: String) -> Dictionary:
 	var query: Dictionary = {}
@@ -380,7 +381,7 @@ func dashboard_get_map_async(p_id: String) -> Dictionary:
 		{"method": HTTPClient.METHOD_GET, "encoding": "form"}
 	)
 
-	return _handle_result(result)
+	return uro_api_const._handle_result(result)
 
 static func _handle_result(result: RefCounted) -> Dictionary:
 	var result_dict: Dictionary = {

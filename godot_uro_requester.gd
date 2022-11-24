@@ -3,6 +3,7 @@ extends RefCounted
 
 const godot_uro_helper_const = preload("godot_uro_helper.gd")
 const random_const = preload("res://addons/gd_util/random.gd")
+const uro_requester_const = preload("res://addons/godot_uro/godot_uro_requester.gd")
 
 const BOUNDARY_STRING_PREFIX = "UroFileUpload"
 const BOUNDARY_STRING_LENGTH = 32
@@ -132,7 +133,7 @@ func request(p_path: String, p_payload: Dictionary, p_use_token: int, p_options:
 			"multipart":
 				var boundary_string: String = BOUNDARY_STRING_PREFIX + random_const.generate_insecure_unique_id(BOUNDARY_STRING_LENGTH)
 				headers.append("Content-Type: multipart/form-data; boundary=%s" % boundary_string)
-				encoded_payload = _compose_multipart_body(p_payload, boundary_string)
+				encoded_payload = uro_requester_const._compose_multipart_body(p_payload, boundary_string)
 			_:
 				printerr("Unknown encoding type!")
 				self._internal_request_done.emit()
@@ -147,7 +148,7 @@ func request(p_path: String, p_payload: Dictionary, p_use_token: int, p_options:
 
 	if not await http_state.wait_for_request():
 		#print("Do request failed...  " + p_path)
-		var ret = get_status_error_response(http_client.get_status())
+		var ret = uro_requester_const.get_status_error_response(http_client.get_status())
 		http_state.release()
 		return ret
 	print("Done await! " + p_path)
