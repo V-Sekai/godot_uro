@@ -88,7 +88,7 @@ class HTTPState:
 				# we have work to do
 			elif status != HTTPClient.STATUS_CONNECTING and status != HTTPClient.STATUS_RESOLVING and status != HTTPClient.STATUS_CONNECTED:
 				busy = false
-				printerr("GodotUroRequester: could not connect to host: status = " + str(http.get_status()))
+				printerr("GodotUroRequester: could not connect to host: status = %s" % [str(http.get_status())])
 				# call callback
 				return _connection_finished.emit(null)
 			else:
@@ -203,7 +203,7 @@ class HTTPState:
 			#print("Connecting to " + str(hostname) + ":" + str(port) + " on ssl:" + str(use_ssl))
 			connect_err = http.connect_to_host(hostname, port, use_ssl, use_ssl) # verify_host = false
 			if connect_err != OK:
-				printerr("GodotUroRequester: could not connect to host: returned error " + str(connect_err))
+				printerr("GodotUroRequester: could not connect to host: returned error %s" % str(connect_err))
 				http.close()
 				http = HTTPClient.new()
 				# call callback
