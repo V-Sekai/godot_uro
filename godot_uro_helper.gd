@@ -163,7 +163,7 @@ static func process_session_json(p_input: Dictionary) -> Dictionary:
 			if output is Dictionary:
 				var data = output.get("data")
 				if data is Dictionary:
-					var renewel_token: String = get_value_of_type(data, "renewal_token", TYPE_STRING, GodotUroData.renewal_token)
+					var renewal_token: String = get_value_of_type(data, "renewal_token", TYPE_STRING, GodotUroData.renewal_token)
 					var access_token: String = get_value_of_type(data, "access_token", TYPE_STRING, GodotUroData.access_token)
 					
 					var user: Dictionary = get_value_of_type(data, "user", TYPE_DICTIONARY, {})
@@ -179,7 +179,7 @@ static func process_session_json(p_input: Dictionary) -> Dictionary:
 						"generic_code":p_input["generic_code"],
 						"response_code":p_input["response_code"],
 						"message":"Success!",
-						"renewel_token":renewel_token,\
+						"renewal_token": renewal_token,\
 						"access_token":access_token,\
 						"user_id":user_id,\
 						"user_username":user_username,\
