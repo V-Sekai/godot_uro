@@ -20,11 +20,13 @@ const godot_uro_request_const = preload("./godot_uro_requester.gd")
 var godot_uro_api: RefCounted = null
 var http_pool = http_pool_const.new()
 
+
 func get_uro_config_path() -> String:
 	if Engine.is_editor_hint():
 		return EDITOR_CONFIG_FILE_PATH
 	else:
 		return GAME_CONFIG_FILE_PATH
+
 
 func get_base_url() -> String:
 	if use_localhost:
@@ -32,6 +34,7 @@ func get_base_url() -> String:
 		return "http://127.0.0.1:" + str(uro_port)
 	else:
 		return uro_host
+
 
 func get_host_and_port() -> Dictionary:
 	var host: String = ""
@@ -49,47 +52,49 @@ func get_host_and_port() -> Dictionary:
 
 func using_ssl() -> bool:
 	return uro_using_ssl
-	
-func create_requester(): # godot_uro_request_const
+
+
+func create_requester():  # godot_uro_request_const
 	var host_and_port: Dictionary = get_host_and_port()
 
-	var new_requester = godot_uro_request_const.new(http_pool,
-		host_and_port.host, host_and_port.port, using_ssl()
-	)
-	
+	var new_requester = godot_uro_request_const.new(http_pool, host_and_port.host, host_and_port.port, using_ssl())
+
 	return new_requester
 
+
 func setup_configuration() -> void:
-	if ! ProjectSettings.has_setting("services/uro/use_localhost"):
+	if !ProjectSettings.has_setting("services/uro/use_localhost"):
 		ProjectSettings.set_setting("services/uro/use_localhost", use_localhost)
 	else:
 		use_localhost = ProjectSettings.get_setting("services/uro/use_localhost")
 
-	if ! ProjectSettings.has_setting("services/uro/host"):
+	if !ProjectSettings.has_setting("services/uro/host"):
 		ProjectSettings.set_setting("services/uro/host", uro_host)
 	else:
 		uro_host = ProjectSettings.get_setting("services/uro/host")
 
-	if ! ProjectSettings.has_setting("services/uro/port"):
+	if !ProjectSettings.has_setting("services/uro/port"):
 		ProjectSettings.set_setting("services/uro/port", uro_port)
 	else:
 		uro_port = ProjectSettings.get_setting("services/uro/port")
 
-	if ! ProjectSettings.has_setting("services/uro/use_ssl"):
+	if !ProjectSettings.has_setting("services/uro/use_ssl"):
 		ProjectSettings.set_setting("services/uro/use_ssl", uro_using_ssl)
 	else:
 		uro_using_ssl = ProjectSettings.get_setting("services/uro/use_ssl")
 
+
 func _ready():
 	add_child(http_pool)
+
 
 func _init():
 	cfg = ConfigFile.new()
 	if cfg.load(get_uro_config_path()) != OK:
 		if cfg.save(get_uro_config_path()) != OK:
 			printerr("Could not save token!")
-		
+
 	setup_configuration()
-		
+
 	if godot_uro_api == null:
 		godot_uro_api = godot_uro_api_const.new(self)
