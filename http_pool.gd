@@ -66,7 +66,8 @@ class HTTPState:
 				if file:
 					file.close()
 				# call callback
-				return _connection_finished.emit(null)
+				_connection_finished.emit(null)
+				return
 
 			if cancelled:
 				if file:
@@ -75,8 +76,9 @@ class HTTPState:
 				busy = false
 				http.close()
 				# call callback
-				return _connection_finished.emit(null)
-
+				_connection_finished.emit(null)
+				return
+				
 			# if http.get_status() == HTTPClient.STATUS_CONNECTING or http.get_status() == HTTPClient.STATUS_RESOLVING:
 			var _poll_error: int = http.poll()
 			status = http.get_status()
@@ -90,7 +92,8 @@ class HTTPState:
 				busy = false
 				printerr("GodotUroRequester: could not connect to host: status = %s" % [str(http.get_status())])
 				# call callback
-				return _connection_finished.emit(null)
+				_connection_finished.emit(null)
+				return
 			else:
 				pass
 		else:
@@ -99,11 +102,13 @@ class HTTPState:
 				if file:
 					file.close()
 				# call callback
-				return _request_finished.emit(false)
+				_request_finished.emit(false)
+				return
 
 			if status != HTTPClient.STATUS_REQUESTING and status != HTTPClient.STATUS_BODY:
 				#print("Invalid status! " + str(status))
-				return _request_finished.emit(false)
+				_request_finished.emit(false)
+				return
 
 			if cancelled:
 				if file:
@@ -112,7 +117,8 @@ class HTTPState:
 				busy = false
 				http.close()
 				# call callback
-				return _request_finished.emit(false)
+				_request_finished.emit(false)
+				return
 
 			if status == HTTPClient.STATUS_REQUESTING:
 				#print("Requesting-ing")
@@ -132,7 +138,8 @@ class HTTPState:
 						if file.is_null():
 							busy = false
 							status = HTTPClient.STATUS_CONNECTED # failed to write to file
-							return _request_finished.emit(false)
+							_request_finished.emit(false)
+							return
 
 			var last_yield = Time.get_ticks_msec()
 			while status == HTTPClient.STATUS_BODY:
@@ -161,7 +168,8 @@ class HTTPState:
 					if file:
 						file.close()
 					busy = false
-					return _request_finished.emit(false)
+					_request_finished.emit(false)
+					return
 
 				if status != HTTPClient.STATUS_BODY:
 					busy = false
