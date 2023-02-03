@@ -208,8 +208,8 @@ class HTTPState:
 			http = HTTPClient.new()
 
 		if status != HTTPClient.STATUS_CONNECTED:
-			#print("Connecting to " + str(hostname) + ":" + str(port) + " on ssl:" + str(use_ssl))
-			connect_err = http.connect_to_host(hostname, port, use_ssl, use_ssl) # verify_host = false
+			var tls_options : TLSOptions = TLSOptions.client(null)
+			connect_err = http.connect_to_host(hostname, port, tls_options)
 			if connect_err != OK:
 				printerr("GodotUroRequester: could not connect to host: returned error %s" % str(connect_err))
 				http.close()
