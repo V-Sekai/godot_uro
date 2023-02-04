@@ -1,10 +1,12 @@
 extends Node
 
+
 class Future:
 	signal completed(http: HTTPClient)
 
+
 var next_request: int = 0
-var pending_requests: Dictionary # int -> Future
+var pending_requests: Dictionary  # int -> Future
 
 var http_client_pool: Array[HTTPClient]
 var total_http_clients: int = 0
@@ -53,8 +55,7 @@ class HTTPState:
 		else:
 			self.completed.emit.call_deferred(null)
 		await self.completed
-		
-		
+
 	func term() -> void:
 		terminated = true
 		http.close()
@@ -78,17 +79,25 @@ class HTTPState:
 				# call callback
 				_connection_finished.emit(null)
 				return
-				
+
 			# if http.get_status() == HTTPClient.STATUS_CONNECTING or http.get_status() == HTTPClient.STATUS_RESOLVING:
 			var _poll_error: int = http.poll()
 			status = http.get_status()
-				
-			if status == HTTPClient.STATUS_CONNECTED or status == HTTPClient.STATUS_REQUESTING or status == HTTPClient.STATUS_BODY:
+
+			if (
+				status == HTTPClient.STATUS_CONNECTED
+				or status == HTTPClient.STATUS_REQUESTING
+				or status == HTTPClient.STATUS_BODY
+			):
 				# done connecting!!
 				#print("Done Connect")
 				_connection_finished.emit(http)
 				# we have work to do
-			elif status != HTTPClient.STATUS_CONNECTING and status != HTTPClient.STATUS_RESOLVING and status != HTTPClient.STATUS_CONNECTED:
+			elif (
+				status != HTTPClient.STATUS_CONNECTING
+				and status != HTTPClient.STATUS_RESOLVING
+				and status != HTTPClient.STATUS_CONNECTED
+			):
 				busy = false
 				printerr("GodotUroRequester: could not connect to host: status = %s" % [str(http.get_status())])
 				# call callback
@@ -127,7 +136,7 @@ class HTTPState:
 				if status == HTTPClient.STATUS_BODY:
 					response_code = http.get_response_code()
 					response_headers = http.get_response_headers_as_dictionary()
-					
+
 					bytes = 0
 					if response_headers.has("Content-Length"):
 						total_bytes = int(response_headers["Content-Length"])
@@ -137,7 +146,7 @@ class HTTPState:
 						file = FileAccess.open(out_path, FileAccess.WRITE)
 						if file.is_null():
 							busy = false
-							status = HTTPClient.STATUS_CONNECTED # failed to write to file
+							status = HTTPClient.STATUS_CONNECTED  # failed to write to file
 							_request_finished.emit(false)
 							return
 
@@ -148,23 +157,19 @@ class HTTPState:
 
 				var chunk = http.read_response_body_chunk()
 				response_code = http.get_response_code()
-				
+
 				if file:
 					file.store_buffer(chunk)
 				else:
 					response_body.append_array(chunk)
 				bytes += chunk.size()
 				self.download_progressed.emit(bytes, total_bytes)
-					
+
 				var time = Time.get_ticks_msec()
-					
+
 				status = http.get_status()
 				# #print("FINAL STATUS: " + str(status))
-				if (
-					status == HTTPClient.STATUS_CONNECTION_ERROR
-					and ! terminated
-					and ! cancelled
-				):
+				if status == HTTPClient.STATUS_CONNECTION_ERROR and !terminated and !cancelled:
 					if file:
 						file.close()
 					busy = false
@@ -188,7 +193,11 @@ class HTTPState:
 			if connection is StreamPeerTLS:
 				var underlying: StreamPeer = connection.get_stream()
 				if underlying is StreamPeerTCP:
-					if status == HTTPClient.STATUS_CONNECTED and underlying.get_connected_host() == hostname and underlying.get_connected_port() == port:
+					if (
+						status == HTTPClient.STATUS_CONNECTED
+						and underlying.get_connected_host() == hostname
+						and underlying.get_connected_port() == port
+					):
 						#print("Found cached https connection " + str(hostname))
 						return http
 				else:
@@ -198,7 +207,12 @@ class HTTPState:
 						return http
 		elif not use_ssl and status == HTTPClient.STATUS_CONNECTED:
 			if connection is StreamPeerTCP:
-				if (not (connection is StreamPeerTLS)) and status == HTTPClient.STATUS_CONNECTED and connection.get_connected_host() == hostname and connection.get_connected_port() == port:
+				if (
+					(not (connection is StreamPeerTLS))
+					and status == HTTPClient.STATUS_CONNECTED
+					and connection.get_connected_host() == hostname
+					and connection.get_connected_port() == port
+				):
 					#print("Found cached http tcp connection " + str(hostname))
 					return http
 
@@ -208,7 +222,7 @@ class HTTPState:
 			http = HTTPClient.new()
 
 		if status != HTTPClient.STATUS_CONNECTED:
-			var tls_options : TLSOptions = TLSOptions.client(null)
+			var tls_options: TLSOptions = TLSOptions.client(null)
 			connect_err = http.connect_to_host(hostname, port, tls_options)
 			if connect_err != OK:
 				printerr("GodotUroRequester: could not connect to host: returned error %s" % str(connect_err))
@@ -244,13 +258,16 @@ class HTTPState:
 			self.http_pool = null
 			self.http = null
 
+
 func _process(_ts: float):
 	http_tick.emit()
+
 
 func _init(p_http_client_limit: int = 5):
 	total_http_clients = p_http_client_limit
 	for i in range(total_http_clients):
 		http_client_pool.push_back(HTTPClient.new())
+
 
 func _acquire_client() -> HTTPClient:
 	if not http_client_pool.is_empty():
@@ -259,6 +276,7 @@ func _acquire_client() -> HTTPClient:
 	pending_requests[next_request] = f
 	next_request += 1
 	return await f.completed
+
 
 func _release_client(http: HTTPClient):
 	var pending_key: Variant = null
@@ -271,7 +289,7 @@ func _release_client(http: HTTPClient):
 	else:
 		http_client_pool.push_back(http)
 
+
 func new_http_state() -> HTTPState:
 	var http_client: HTTPClient = await _acquire_client()
 	return HTTPState.new(self, http_client)
- 
