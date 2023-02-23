@@ -12,7 +12,6 @@ var uro_host: String = godot_uro_helper_const.DEFAULT_URO_HOST
 var uro_port: int = godot_uro_helper_const.DEFAULT_URO_PORT
 var uro_using_ssl: bool = true
 
-const EDITOR_CONFIG_FILE_PATH = "user://uro_editor.ini"
 const GAME_CONFIG_FILE_PATH = "user://uro.ini"
 const godot_uro_api_const = preload("./godot_uro_api.gd")
 const godot_uro_request_const = preload("./godot_uro_requester.gd")
@@ -22,10 +21,7 @@ var http_pool = http_pool_const.new()
 
 
 func get_uro_config_path() -> String:
-	if Engine.is_editor_hint():
-		return EDITOR_CONFIG_FILE_PATH
-	else:
-		return GAME_CONFIG_FILE_PATH
+	return GAME_CONFIG_FILE_PATH
 
 
 func get_base_url() -> String:
