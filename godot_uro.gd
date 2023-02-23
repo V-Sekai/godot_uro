@@ -24,9 +24,11 @@ var http_pool = http_pool_const.new()
 func get_uro_config_path() -> String:
 	return GAME_CONFIG_FILE_PATH
 
+
 func get_uro_editor_config_path() -> String:
 	return EDITOR_CONFIG_FILE_PATH
-	
+
+
 func get_base_url() -> String:
 	if use_localhost:
 		# "http://localhost:" does not work
@@ -95,11 +97,11 @@ func _init():
 		printerr("Could not load game token!")
 
 	setup_configuration()
-		
+
 	if cfg.save(get_uro_editor_config_path()) != OK:
 		printerr("Could not save editor token!")
 	elif cfg.save(get_uro_config_path()) != OK:
 		printerr("Could not save game token!")
-		
+
 	if godot_uro_api == null:
 		godot_uro_api = godot_uro_api_const.new(self)
